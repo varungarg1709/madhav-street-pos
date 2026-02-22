@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Madhav Street - Daily Expenses</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 20px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    .section {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 6px;
+        color: #444;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .row {
+        display: flex;
+        gap: 15px;
+    }
+
+    .row .section {
+        flex: 1;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #218838;
+    }
+
+    @media (max-width: 600px) {
+        .row {
+            flex-direction: column;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Madhav Street Daily Expense</h1>
+
+    <form id="expenseForm">
+
+        <div class="section">
+            <label>Date</label>
+            <input type="date" name="date" required>
+        </div>
+
+        <div class="section">
+            <label>Expense Category</label>
+            <select name="category" required>
+                <option value="">Select Category</option>
+                <option>Stock</option>
+                <option>Vegetables</option>
+                <option>Cleaning Material</option>
+                <option>Gas Cylinder</option>
+                <option>Electricity</option>
+                <option>Staff</option>
+                <option>Decoration</option>
+                <option>Utensils</option>
+                <option>Cold Drinks</option>
+                <option>Loose Items</option>
+                <option>Random Expense</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <label>Expense Type</label>
+            <select name="type">
+                <option>Oil</option>
+                <option>Milk</option>
+                <option>Paneer</option>
+                <option>Dahi</option>
+                <option>Rice</option>
+                <option>Flour</option>
+                <option>Noodles</option>
+                <option>Sauce</option>
+                <option>Salt</option>
+                <option>Masala</option>
+                <option>Paper Plates</option>
+                <option>Gas Refill</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="section">
+                <label>Amount Paid (₹)</label>
+                <input type="number" name="amount" required>
+            </div>
+
+            <div class="section">
+                <label>Payment Mode</label>
+                <select name="mode">
+                    <option>Cash</option>
+                    <option>UPI</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <label>Paying Account</label>
+            <input type="text" name="account" placeholder="e.g. Varun, Shop Cash, UPI ID">
+        </div>
+
+        <div class="section">
+            <label>Expense By</label>
+            <select name="expense_by">
+                <option>Varun</option>
+                <option>Amit</option>
+                <option>Staff</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <label>Purchased From</label>
+            <input type="text" name="vendor" placeholder="Vendor name">
+        </div>
+
+        <div class="section">
+            <label>Comment</label>
+            <textarea name="comment" rows="3"></textarea>
+        </div>
+
+        <button type="submit">Submit Expense</button>
+
+    </form>
+</div>
+
+<script>
+document.getElementById("expenseForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("YOUR_GOOGLE_SCRIPT_WEB_APP_URL", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.text())
+    .then(data => {
+        alert("Expense saved successfully!");
+        document.getElementById("expenseForm").reset();
+    })
+    .catch(err => {
+        alert("Error saving expense");
+        console.error(err);
+    });
+});
+</script>
+
+</body>
+</html>

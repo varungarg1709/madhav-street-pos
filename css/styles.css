@@ -1,0 +1,1470 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f3f3f3;
+  color: #222;
+}
+
+/* ================= TOP NAV ================= */
+.top-nav {
+  background: #222;
+  padding: 10px;
+}
+
+.top-nav button {
+  background: #ff6a00;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  margin-right: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ================= LAYOUT ================= */
+.container {
+  display: flex;
+  height: calc(100vh - 50px);
+  overflow: hidden;
+}
+
+/* ================= MENU PANEL ================= */
+.menu {
+  flex: 1.2;
+  min-width: 55%;
+  padding: 20px;
+  background: white;
+  overflow-y: auto;
+}
+
+/* Search */
+.menu-search {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.menu-search:focus {
+  border-color: #ff6a00;
+  outline: none;
+}
+
+/* Categories */
+.categories {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  background: #e5e5e5;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.category-btn.active {
+  background: #ff6a00;
+  color: white;
+}
+
+/* Menu grid */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+  gap: 10px;
+}
+
+/* Menu item */
+.menu-item {
+  color: white;
+  padding: 12px 8px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+.menu-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.item-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.item-price {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Menu color variants */
+.menu-regular {
+  background: #ff6a00;
+}
+.menu-half {
+  background: #ff8c42;
+}
+.menu-full {
+  background: #ff4d00;
+}
+.menu-white {
+  background: #3498db;
+}
+.menu-brown {
+  background: #8e5a3c;
+}
+
+/* ================= BILL PANEL ================= */
+.bill {
+  flex: 1;
+  min-width: 45%;
+  background: #f6f6f6;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bill-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.btn-row {
+  background: #f6f6f6;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #ddd;
+}
+
+/* Card layout */
+.card {
+  background: white;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #eee;
+}
+
+/* Bill header */
+.bill-header {
+  background: #ffe8d6;
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Top controls */
+.top-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.top-controls input,
+.top-controls select {
+  padding: 8px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+#orderDate {
+  width: 130px;
+}
+#tableNo {
+  width: 90px;
+}
+#customerName {
+  flex: 1;
+  min-width: 160px;
+}
+#orderSource {
+  width: 140px;
+}
+
+/* Segmented order type */
+.order-type {
+  display: flex;
+  background: #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 38px;
+  min-width: 260px;
+}
+
+.order-type label {
+  flex: 1;
+}
+
+.order-type input {
+  display: none;
+}
+
+.order-type span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.order-type input:checked + span {
+  background: #ff6a00;
+  color: white;
+}
+
+/* Bill items */
+.bill-items {
+  min-height: 120px;
+}
+
+.empty-text {
+  text-align: center;
+  color: #888;
+  padding: 20px 0;
+  font-size: 14px;
+}
+
+.bill-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.bill-item-name {
+  flex: 2;
+  font-size: 15px;
+}
+
+.qty-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.qty-btn {
+  padding: 4px 8px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.qty-input {
+  width: 45px;
+  text-align: center;
+  padding: 4px;
+}
+
+.bill-item-total {
+  width: 80px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.remove-btn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Totals */
+.totals-box {
+  border: 1px solid #eee;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.final-total {
+  font-size: 22px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+/* Order details */
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.extra-details input,
+.extra-details select,
+.extra-details textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+}
+
+/* Phone + WhatsApp */
+.phone-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.phone-row input {
+  flex: 1;
+}
+
+.wa-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  background: #f3f3f3;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wa-toggle input {
+  transform: scale(1.1);
+}
+
+/* Payment */
+.payment-section {
+  margin-bottom: 12px;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.pay-row input {
+  width: 120px;
+  padding: 6px;
+}
+
+.payment-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.clear-btn {
+  background: #ddd;
+}
+.print-btn {
+  background: #333;
+  color: white;
+}
+.save-btn {
+  background: #ff6a00;
+  color: white;
+}
+
+/* ================= BOOKINGS ================= */
+.bookings-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.booking-card,
+.booking-list-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.booking-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.booking-form-grid input,
+.booking-form-grid select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.booking-card .save-btn {
+  width: 220px;
+  margin-top: 10px;
+}
+
+/* ================= SALES DASHBOARD ================= */
+.sales-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sales-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.sales-card span {
+  display: block;
+  font-size: 22px;
+  margin-top: 5px;
+}
+
+.top-nav button {
+  background: #444;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  margin-right: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.top-nav button:hover {
+  background: #ff6a00;
+}
+
+.top-nav button.active {
+  background: #ff6a00;
+}
+
+/* ================= MOBILE POS ================= */
+.mobile-bill-btn {
+  display: none;
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .menu {
+    min-width: 100%;
+    padding: 10px;
+  }
+
+  .bill {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    height: 90vh;
+    background: #f6f6f6;
+    z-index: 1000;
+    transition: bottom 0.3s ease;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .bill.open {
+    bottom: 0;
+  }
+
+  .bill-content {
+    padding: 10px;
+  }
+
+  .btn-row {
+    position: static;
+    margin-top: 10px;
+  }
+
+  /* Floating bill button */
+  .mobile-bill-btn {
+    display: block;
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+    background: #ff6a00;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    z-index: 1100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Bigger menu buttons */
+  .menu-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .menu-item {
+    padding: 16px 8px;
+    font-size: 15px;
+  }
+
+  .item-name {
+    font-size: 14px;
+  }
+
+  .item-price {
+    font-size: 13px;
+  }
+
+  .categories {
+    display: none;
+  }
+
+  /* Reduce search spacing */
+  .menu-search {
+    margin-bottom: 8px;
+  }
+}
+
+/* ================= PRINT BILL ================= */
+
+/* ================= PRINT RECEIPT ================= */
+
+.print-area {
+  display: none;
+}
+
+.print-bill {
+  width: 280px;
+  margin: auto;
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: #000;
+}
+
+.print-header {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.print-logo {
+  width: 50px;
+  margin-bottom: 4px;
+}
+
+.print-header h2 {
+  margin: 2px 0;
+  font-size: 18px;
+}
+
+.print-sub {
+  font-size: 11px;
+}
+
+.print-line {
+  border-top: 1px dashed #000;
+  margin: 6px 0;
+}
+
+.print-meta {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.print-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.print-items {
+  margin-top: 6px;
+}
+
+.print-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 0;
+}
+
+.print-name {
+  flex: 1;
+}
+
+.print-qty {
+  width: 30px;
+  text-align: center;
+}
+
+.print-price {
+  width: 60px;
+  text-align: right;
+}
+
+.print-total {
+  text-align: right;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.print-grand {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.print-footer {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+/* Print only receipt */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printArea,
+  #printArea * {
+    visibility: visible;
+  }
+
+  #printArea {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+/* ================= PRINT RECEIPT FIX ================= */
+@media print {
+  body {
+    background: white;
+  }
+
+  /* Hide everything except receipt */
+  .top-nav,
+  .menu,
+  .btn-row,
+  .categories,
+  .menu-search {
+    display: none !important;
+  }
+
+  .container {
+    display: block;
+    height: auto;
+  }
+
+  .bill {
+    width: 80mm; /* receipt width */
+    margin: 0 auto;
+    background: white;
+  }
+
+  .bill-content {
+    padding: 10px;
+    overflow: visible;
+  }
+
+  .card {
+    border: none;
+    margin-bottom: 6px;
+    padding: 6px;
+  }
+
+  /* Prevent page breaks */
+  .bill,
+  .bill-content,
+  .card,
+  .bill-items {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Remove large fonts for print */
+  .final-total {
+    font-size: 18px;
+  }
+
+  /* Reduce spacing */
+  .bill-line {
+    padding: 4px 0;
+  }
+
+  /* Remove extra margins */
+  @page {
+    size: auto;
+    margin: 5mm;
+  }
+}
+
+.order-card {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+}
+
+.edit-btn {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: none;
+  background: #ff6a00;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* ================= ORDERS TABLE ================= */
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.orders-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.orders-table-wrapper {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  margin: 10px;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.orders-table thead {
+  position: sticky;
+  top: 0;
+  background: #222;
+  color: #fff;
+  z-index: 2;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.orders-table tr:hover {
+  background: #f5f5f5;
+}
+
+.order-actions button {
+  margin-right: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.orders-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.orders-table-wrapper {
+  overflow: auto;
+  max-height: 65vh;
+  border: 1px solid #ddd;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th,
+.orders-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.orders-table thead {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+/* Orders table */
+.orders-table-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.orders-table th {
+  background: #f5f5f5;
+  text-align: left;
+  padding: 10px;
+  position: sticky;
+  top: 0;
+}
+
+.orders-table th {
+  background: #222 !important;
+  color: white;
+  text-align: left;
+  padding: 12px 10px;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.orders-table td {
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+.orders-table tr:hover {
+  background: #fafafa;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-paid {
+  background: #e6f7ed;
+  color: #0a7a36;
+}
+
+.status-pending {
+  background: #ffe8e8;
+  color: #b30000;
+}
+
+.status-partial {
+  background: #fff3e0;
+  color: #cc7a00;
+}
+
+/* Edit button */
+.orders-table button {
+  padding: 6px 12px;
+  border: none;
+  background: #ff7a00;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.orders-table button:hover {
+  background: #e66d00;
+}
+
+.orders-filters {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.orders-filters input,
+.orders-filters select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Layout */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f4f6f8;
+  padding: 16px;
+}
+
+/* Sidebar */
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #2b2f36; /* softer dark slate */
+  color: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+/* Header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+}
+
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: #d1d5db;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Nav buttons */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+}
+
+.sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  color: #e5e7eb;
+  font-size: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-nav button.active {
+  background: #ff6b00;
+  color: white;
+}
+
+.icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.sidebar.collapsed .label {
+  display: none;
+}
+
+.screen {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ================= PAGE HEADER ================= */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-card {
+  padding: 16px 20px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 20px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-group label {
+  font-size: 13px;
+  color: #666;
+}
+
+.filter-group input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.material-symbols-outlined.icon {
+  font-size: 22px;
+  width: 24px;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0px;
+}
+
+.card {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0px;
+}
+.card-header h3{
+  margin: 0px 0px 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-grid input,
+.form-grid select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.form-grid select[multiple] {
+  height: 90px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: #222;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.summary-card span {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 6px;
+  color: #111;
+}
+
+/* Expenses topbar */
+.expenses-topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.primary-btn {
+  background: #ff6a00;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: unset;
+}
+
+.primary-btn:hover {
+  background: #e65f00;
+}
+
+.primary-btn.full-width {
+  width: 100%;
+}
+
+/* ================= EXPENSE DRAWER ================= */
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 420px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -6px 0 20px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease;
+  z-index: 1200;
+}
+
+.drawer.open {
+  right: 0;
+}
+
+/* HEADER (reduced height) */
+.drawer-header {
+  height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* Close icon alignment */
+.drawer-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.drawer-close:hover {
+  background: #f3f3f3;
+}
+
+/* BODY scroll */
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+/* FOOTER FIXED */
+.drawer-footer {
+  height: 64px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  background: white;
+}
+
+.drawer-footer button {
+  flex: 1;
+}
+
+/* Secondary button */
+.secondary-btn {
+  background: #eee;
+  border: none;
+  border-radius: 8px;
+}
+
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.receiver-row {
+  margin-bottom: 12px;
+}
+
+.receiver-row label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.receiver-options {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.receiver-options label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3f3f3;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+
+/* Owner dashboard */
+#salesSummary,
+#partnerStats {
+  margin-bottom: 20px;
+}
+
+.sales-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.sales-card {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.sales-card span {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  min-width: 130px;
+}
+
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px,1fr));
+  gap: 16px;
+}
+
+.settings-card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.setting-item button {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.settings-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.settings-add-row input {
+  flex: 1;
+  padding: 8px;
+}
+
+
+.settings-card {
+  margin-bottom: 20px;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-add-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.settings-add-row input {
+  flex: 1;
+  padding: 8px;
+}
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.settings-table th {
+  background: #222;
+  color: white;
+  padding: 10px;
+  text-align: left;
+}
+
+.settings-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.setting-input {
+  width: 100%;
+  padding: 7px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.settings-table button {
+  padding: 6px 10px;
+  border: none;
+  background: #2f6fed;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.settings-table button.danger {
+  background: #ff4d4d;
+}

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Madhav Street POS</title>
+  <style>
+  body {
+    margin: 0;
+    font-family: Arial;
+    background: #f3f3f3;
+  }
+
+.container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.menu {
+  width: 60%;
+  padding: 20px;
+  background: white;
+  overflow-y: auto;
+}
+
+.categories {
+display: flex;
+gap: 8px;
+margin-bottom: 15px;
+flex-wrap: wrap;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  background: #e5e5e5;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.category-btn.active {
+  background: #ff6a00;
+  color: white;
+}
+
+
+.menu-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+gap: 10px;
+}
+
+.menu-item {
+  background: #ff6a00;
+  color: white;
+  padding: 16px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.menu-item:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+
+.bill {
+  width: 40%;
+  background: #f6f6f6;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+}
+
+.bill-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  padding-bottom: 110px;
+}
+
+.booking-panel {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.booking-item {
+  padding: 6px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.booking-item:hover {
+  background: #fff3e6;
+}
+
+
+.btn-row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f6f6f6;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #ddd;
+}
+
+button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.clear-btn { background: #ddd; }
+.print-btn { background: #333; color: white; }
+.save-btn { background: #ff6a00; color: white; }
+
+
+
+.bill-items {
+  flex: 1;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y: auto;
+  margin: 10px 0;
+  min-height: 100px;
+}
+
+
+.bill-line {
+display: grid;
+grid-template-columns: 1fr 120px 80px;
+align-items: center;
+gap: 10px;
+margin: 6px 0;
+padding-bottom: 6px;
+border-bottom: 1px solid #eee;
+}
+
+.bill-no {
+  background: #ffe8d6;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.qty-controls {
+display: flex;
+gap: 5px;
+align-items: center;
+justify-content: center;
+}
+
+.qty-btn {
+padding: 4px 8px;
+background: #ddd;
+border: none;
+cursor: pointer;
+}
+
+.qty-input {
+width: 40px;
+text-align: center;
+padding: 4px;
+}
+
+.totals-box {
+  background: white;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 12px 0;
+  border: 1px solid #eee;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.final-total {
+  font-size: 22px;
+  font-weight: bold;
+  color: #111;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+
+
+.extra-details {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.extra-details select {
+  width: 100%;
+  padding: 6px;
+  font-size: 13px;
+}
+
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.extra-details input,
+.extra-details select,
+.extra-details textarea {
+  width: 100%;
+  padding: 6px;
+  font-size: 13px;
+}
+
+.top-controls {
+  display: grid;
+  grid-template-columns: 140px 90px 1fr 140px auto;
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.top-controls input,
+.top-controls select {
+  padding: 8px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.order-type {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+}
+
+
+#tableNo {
+  height: 36px;
+}
+
+.payment-section {
+  background: white;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 12px 0;
+  border: 1px solid #eee;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.pay-row input {
+  width: 110px;
+  padding: 6px;
+}
+</style>
+
+</head>
+
+<body>
+<div class="container">
+
+  <!-- Menu -->
+
+  <div class="menu">
+    <div class="categories" id="categoryBar"></div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+
+  <!-- Bill -->
+
+  <div class="bill">
+    <div class="bill-content">
+      <!-- <h2>Bill</h2> -->
+
+      <div class="booking-panel">
+  <h4>Upcoming Bookings</h4>
+  <div id="bookingList"></div>
+</div>
+
+
+      <div class="bill-no">
+        Bill No: <span id="billNumber">MS/--/----/---</span>
+      </div>
+
+      <div class="top-controls">
+        <input type="date" id="orderDate" onchange="generateBillNumber()">
+        <select id="tableNo" multiple size="3" onchange="onTableChange()"></select>
+      
+        <input type="text" id="customerName" placeholder="Customer name">
+      
+        <select id="orderSource">
+          <option value="Walk-in">Walk-in</option>
+          <option value="Takeaway">Takeaway</option>
+          <option value="Zomato">Zomato</option>
+          <option value="Swiggy">Swiggy</option>
+          <option value="Phone Order">Phone Order</option>
+          <option value="Other">Other</option>
+        </select>
+      
+        <div class="order-type">
+  <label><input type="radio" name="orderType" value="Dine-in" checked onchange="onOrderTypeChange()"> Dine-in</label>
+  <label><input type="radio" name="orderType" value="Takeaway" onchange="onOrderTypeChange()"> Takeaway</label>
+  <label><input type="radio" name="orderType" value="Delivery" onchange="onOrderTypeChange()"> Delivery</label>
+  <label><input type="radio" name="orderType" value="Booking" onchange="onOrderTypeChange()"> Booking</label>
+</div>
+
+      </div>
+
+      <div class="bill-items" id="billItems"></div>
+      
+      <div class="totals-box">
+        <div class="total-row">
+  <span>Subtotal</span>
+  <span>₹<span id="subtotal">0</span></span>
+</div>
+
+        <input type="number" id="discount" placeholder="Discount ₹" oninput="renderBill()">
+        <div class="final-total">
+          Total: ₹<span id="total">0</span>
+        </div>
+      </div>
+
+      <div class="extra-details">
+        <h4>Order Details</h4>
+      
+        <div class="details-grid">
+          <input type="text" id="phone" placeholder="Phone">
+      
+          <input type="number" id="totalMembers" placeholder="Total members">
+      
+          <select id="eventType">
+            <option value="">Event type</option>
+            <option>Birthday</option>
+            <option>Kitty Party</option>
+            <option>Corporate</option>
+            <option>Other</option>
+          </select>
+      
+          <select id="deliveredBy">
+            <option value="">Delivered by</option>
+          </select>
+      
+          <input type="number" id="review" min="1" max="5" placeholder="Review (1–5)">
+          <input type="number" id="advanceAmount" placeholder="Advance amount ₹">
+        </div>
+      
+        <textarea id="feedback" placeholder="Feedback"></textarea>
+      </div>
+
+      <div class="payment-section">
+        <h4>Payment</h4>
+      
+        <div class="pay-row">
+          <label>Cash</label>
+          <input type="number" id="cashAmount" oninput="updatePaymentStatus()">
+        </div>
+      
+        <div class="pay-row">
+          <label>UPI</label>
+          <input type="number" id="upiAmount" oninput="updatePaymentStatus()">
+        </div>
+      
+        <div class="pay-row">
+          <label>Card</label>
+          <input type="number" id="cardAmount" oninput="updatePaymentStatus()">
+        </div>
+      
+        <div>Paid: ₹<span id="paidTotal">0</span></div>
+        <div>Status: <span id="paymentStatus">Pending</span></div>
+      </div>
+    </div>
+
+
+<div class="btn-row">
+  <button class="clear-btn" onclick="clearBill()">Clear</button>
+  <button class="print-btn" onclick="window.print()">Print</button>
+  <button class="save-btn" onclick="saveBill()">Save</button>
+</div>
+
+<p id="status"></p>
+
+
+  </div>
+</div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbzDsgy-UOT7cpTqnpUjumFLTMcpGmGjiFjVoRQ4AWxNngYnuc1hKLOBVFfhs25CV4kG/exec";
+
+let menuData = [];
+let categories = [];
+let tableOrders = {};
+let currentTable = null;
+
+
+
+window.onload = function () {
+  let today = new Date().toISOString().split("T")[0];
+  document.getElementById("orderDate").value = today;
+  generateBillNumber();
+};
+
+
+
+
+
+fetch(scriptURL)
+  .then(res => res.json())
+  .then(data => {
+    menuData = data.menu;
+    categories = [...new Set(menuData.map(i => i.category))].sort();
+
+    renderCategories();
+    showCategory(categories[0]);
+
+    renderStaff(data.staff);
+    renderTables(data.tables);
+    renderBookings(data.bookings);
+  });
+
+
+
+  function renderTables(tableList) {
+  const tableSelect = document.getElementById("tableNo");
+  tableSelect.innerHTML = "";
+
+  tableList.forEach(table => {
+    const option = document.createElement("option");
+    option.value = table;
+    option.textContent = table;
+    tableSelect.appendChild(option);
+  });
+}
+
+function getSelectedTable() {
+  let orderType = document.querySelector('input[name="orderType"]:checked').value;
+  let orderSource = document.getElementById("orderSource").value;
+
+  let selectedTables = Array.from(
+    document.getElementById("tableNo").selectedOptions
+  ).map(opt => opt.value).join(", ");
+
+  // Dine-in requires actual table
+  if (orderType === "Dine-in") {
+    return selectedTables || null;
+  }
+
+  // Non-dine-in logic
+  if (orderSource && orderSource !== "Walk-in") {
+    return orderSource.toUpperCase();
+  }
+
+  return orderType.toUpperCase();
+}
+
+function renderBookings(list) {
+  const container = document.getElementById("bookingList");
+  container.innerHTML = "";
+
+  list.forEach(b => {
+    const div = document.createElement("div");
+    div.className = "booking-item";
+    div.innerHTML = `
+      <strong>${b.name}</strong><br>
+      ${b.event || "Event"} • ${b.members || 0} pax • ₹${b.advance || 0}
+    `;
+    div.onclick = () => loadBooking(b);
+    container.appendChild(div);
+  });
+}
+
+function loadBooking(b) {
+  document.getElementById("customerName").value = b.name || "";
+  document.getElementById("phone").value = b.phone || "";
+  document.getElementById("totalMembers").value = b.members || "";
+  document.getElementById("advanceAmount").value = b.advance || "";
+  document.getElementById("eventType").value = b.event || "";
+
+  // Switch to dine-in for final billing
+  document.querySelector('input[value="Dine-in"]').checked = true;
+  onOrderTypeChange();
+
+  alert("Booking loaded. Add items and save to complete the bill.");
+}
+
+
+
+
+  function renderStaff(staffList) {
+  const staffSelect = document.getElementById("deliveredBy");
+  staffSelect.innerHTML = '<option value="">Delivered by</option>';
+
+  staffList.forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    staffSelect.appendChild(option);
+  });
+}
+
+
+function renderCategories() {
+  const bar = document.getElementById("categoryBar");
+  bar.innerHTML = "";
+  categories.forEach(cat => {
+    const btn = document.createElement("div");
+    btn.className = "category-btn";
+    btn.innerText = cat;
+    btn.onclick = () => showCategory(cat);
+    bar.appendChild(btn);
+  });
+}
+
+function showCategory(category) {
+  const grid = document.getElementById("menuGrid");
+  grid.innerHTML = "";
+
+  document.querySelectorAll(".category-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.innerText === category);
+  });
+
+  menuData
+    .filter(i => i.category === category)
+    .forEach(item => {
+      const btn = document.createElement("div");
+      btn.className = "menu-item";
+      btn.innerHTML = `${item.item}<br>₹${item.price}`;
+      btn.onclick = () => addItem(item);
+      grid.appendChild(btn);
+    });
+}
+
+function addItem(item) {
+  currentTable = getSelectedTable();
+
+  let orderType = document.querySelector('input[name="orderType"]:checked').value;
+
+  // Only block if dine-in without table
+  if (orderType === "Dine-in" && !currentTable) {
+    alert("Please select a table for dine-in");
+    return;
+  }
+
+  if (!tableOrders[currentTable]) {
+    tableOrders[currentTable] = {};
+  }
+
+  let order = tableOrders[currentTable];
+
+  if (!order[item.item]) {
+    order[item.item] = { qty: 0, price: item.price };
+  }
+
+  order[item.item].qty++;
+  renderBill();
+}
+
+
+
+function changeQty(item, delta) {
+  currentTable = getSelectedTable();
+  let order = tableOrders[currentTable];
+
+  order[item].qty += delta;
+  if (order[item].qty <= 0) delete order[item];
+
+  renderBill();
+}
+
+function setQty(item, value) {
+  currentTable = getSelectedTable();
+  let order = tableOrders[currentTable];
+
+  let qty = parseInt(value) || 0;
+  if (qty <= 0) {
+    delete order[item];
+  } else {
+    order[item].qty = qty;
+  }
+
+  renderBill();
+}
+
+
+function renderBill() {
+  const container = document.getElementById("billItems");
+  container.innerHTML = "";
+
+  let subtotal = 0;
+
+  currentTable = getSelectedTable();
+
+if (!currentTable) {
+  document.getElementById("billItems").innerHTML = "";
+  document.getElementById("subtotal").innerText = "0";
+  document.getElementById("total").innerText = "0";
+  return;
+}
+
+let order = tableOrders[currentTable] || {};
+
+
+for (let item in order) {
+
+    const lineTotal = order[item].qty * order[item].price;
+    subtotal += lineTotal;
+
+    const line = document.createElement("div");
+    line.className = "bill-line";
+    line.innerHTML = `
+      <span>${item}</span>
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="changeQty('${item}', -1)">−</button>
+        <input class="qty-input" type="number" 
+          value="${order[item].qty}" 
+          onchange="setQty('${item}', this.value)">
+        <button class="qty-btn" onclick="changeQty('${item}', 1)">+</button>
+      </div>
+      <span>₹${lineTotal}</span>
+    `;
+    container.appendChild(line);
+  }
+
+  document.getElementById("subtotal").innerText = subtotal;
+
+  let discount = parseFloat(document.getElementById("discount").value) || 0;
+  let total = subtotal - discount;
+  if (total < 0) total = 0;
+
+  document.getElementById("total").innerText = total;
+  updatePaymentStatus();
+}
+
+function updatePaymentStatus() {
+  let cash = parseFloat(document.getElementById("cashAmount").value) || 0;
+  let upi = parseFloat(document.getElementById("upiAmount").value) || 0;
+  let card = parseFloat(document.getElementById("cardAmount").value) || 0;
+
+  let paid = cash + upi + card;
+  let total = parseFloat(document.getElementById("total").innerText) || 0;
+
+  document.getElementById("paidTotal").innerText = paid;
+
+  let status = "Pending";
+  if (paid >= total && total > 0) status = "Paid";
+  else if (paid > 0 && paid < total) status = "Partial";
+
+  document.getElementById("paymentStatus").innerText = status;
+}
+
+function onTableChange() {
+  renderBill();
+}
+
+
+function clearBill() {
+  currentTable = getSelectedTable();
+if (currentTable && tableOrders[currentTable]) {
+  delete tableOrders[currentTable];
+}
+
+  document.getElementById("billItems").innerHTML = "";
+  document.getElementById("subtotal").innerText = "0";
+  document.getElementById("total").innerText = "0";
+  document.getElementById("discount").value = "";
+  document.getElementById("cashAmount").value = "";
+  document.getElementById("upiAmount").value = "";
+  document.getElementById("cardAmount").value = "";
+  document.getElementById("paidTotal").innerText = "0";
+  document.getElementById("paymentStatus").innerText = "Pending";
+  document.getElementById("customerName").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("tableNo").value = "";
+  document.getElementById("eventType").value = "";
+  document.getElementById("totalMembers").value = "";
+  document.getElementById("deliveredBy").value = "";
+  document.getElementById("feedback").value = "";
+  generateBillNumber();
+}
+
+function generateBillNumber() {
+  let dateInput = document.getElementById("orderDate").value;
+
+  let today = dateInput ? new Date(dateInput) : new Date();
+
+  let year = today.getFullYear();
+  let month = today.getMonth() + 1;
+
+  let fyStart, fyEnd;
+
+  if (month >= 4) {
+    fyStart = year.toString().slice(-2);
+    fyEnd = (year + 1).toString().slice(-2);
+  } else {
+    fyStart = (year - 1).toString().slice(-2);
+    fyEnd = year.toString().slice(-2);
+  }
+
+  let financialYear = fyStart + "-" + fyEnd;
+
+  let dd = String(today.getDate()).padStart(2, "0");
+  let mm = String(month).padStart(2, "0");
+
+  let datePart = dd + mm;
+
+  let billNo = "MS/" + financialYear + "/" + datePart + "/001";
+
+  document.getElementById("billNumber").innerText = billNo;
+}
+
+
+function onOrderTypeChange() {
+  let orderType = document.querySelector('input[name="orderType"]:checked').value;
+  const menuSection = document.querySelector(".menu");
+
+  if (orderType === "Booking") {
+    menuSection.style.opacity = "0.4";
+    menuSection.style.pointerEvents = "none";
+
+    // Clear current items
+    currentTable = getSelectedTable();
+    delete tableOrders[currentTable];
+    renderBill();
+  } else {
+    menuSection.style.opacity = "1";
+    menuSection.style.pointerEvents = "auto";
+  }
+}
+
+
+
+function saveBill() {
+   currentTable = getSelectedTable();
+
+if (!currentTable) {
+  alert("Please select order type or table");
+  return;
+}
+
+  currentTable = getSelectedTable();
+let orderType = document.querySelector('input[name="orderType"]:checked').value;
+let order = tableOrders[currentTable] || {};
+
+// If not booking, items must exist
+if (orderType !== "Booking" && Object.keys(order).length === 0) {
+  alert("No items in this bill");
+  return;
+}
+
+
+  let items = "";
+for (let item in order) {
+  items += `${item} x${order[item].qty}, `;
+}
+
+let advance = parseFloat(document.getElementById("advanceAmount").value) || 0;
+let totalAmount = document.getElementById("total").innerText;
+
+if (orderType === "Booking") {
+  totalAmount = advance;
+}
+
+
+  let cash = parseFloat(document.getElementById("cashAmount").value) || 0;
+  let upi = parseFloat(document.getElementById("upiAmount").value) || 0;
+  let card = parseFloat(document.getElementById("cardAmount").value) || 0;
+
+  let paymentMode = [];
+  if (cash > 0) paymentMode.push("Cash");
+  if (upi > 0) paymentMode.push("UPI");
+  if (card > 0) paymentMode.push("Card");
+
+  document.getElementById("f_orderDate").value =
+  document.getElementById("orderDate").value;
+  document.getElementById("f_customerName").value =
+    document.getElementById("customerName").value;
+  document.getElementById("f_phone").value =
+    document.getElementById("phone").value;
+  let selectedTables = Array.from(
+  document.getElementById("tableNo").selectedOptions
+).map(opt => opt.value).join(", ");
+
+document.getElementById("f_tableNo").value = currentTable;
+  document.getElementById("f_orderType").value =
+    document.querySelector('input[name="orderType"]:checked').value;
+    document.getElementById("f_orderSource").value = document.getElementById("orderSource").value;
+  document.getElementById("f_deliveredBy").value =
+    document.getElementById("deliveredBy").value;
+  document.getElementById("f_orderItems").value = items;
+  document.getElementById("f_amount").value = totalAmount;
+document.getElementById("f_advanceAmount").value = advance;
+
+  document.getElementById("f_discount").value =
+    document.getElementById("discount").value;
+  document.getElementById("f_paymentMode").value =
+    paymentMode.join(", ");
+  document.getElementById("f_paymentStatus").value =
+    document.getElementById("paymentStatus").innerText;
+  document.getElementById("f_eventType").value =
+    document.getElementById("eventType").value;
+  document.getElementById("f_totalMembers").value =
+    document.getElementById("totalMembers").value;
+  document.getElementById("f_feedback").value =
+    document.getElementById("feedback").value;
+
+  document.getElementById("hiddenForm").submit();
+  document.getElementById("status").innerText = "Bill saved";
+  delete tableOrders[currentTable];
+clearBill();
+}
+</script>
+
+<form id="hiddenForm" method="POST" target="hiddenFrame"
+      action="https://script.google.com/macros/s/AKfycbzDsgy-UOT7cpTqnpUjumFLTMcpGmGjiFjVoRQ4AWxNngYnuc1hKLOBVFfhs25CV4kG/exec">
+    <input type="hidden" name="orderDate" id="f_orderDate">
+  <input type="hidden" name="customerName" id="f_customerName">
+  <input type="hidden" name="phone" id="f_phone">
+  <input type="hidden" name="tableNo" id="f_tableNo">
+  <input type="hidden" name="orderType" id="f_orderType">
+  <input type="hidden" name="orderSource" id="f_orderSource">
+  <input type="hidden" name="deliveredBy" id="f_deliveredBy">
+  <input type="hidden" name="orderItems" id="f_orderItems">
+  <input type="hidden" name="amount" id="f_amount">
+  <input type="hidden" name="discount" id="f_discount">
+  <input type="hidden" name="paymentMode" id="f_paymentMode">
+  <input type="hidden" name="paymentStatus" id="f_paymentStatus">
+  <input type="hidden" name="eventType" id="f_eventType">
+  <input type="hidden" name="totalMembers" id="f_totalMembers">
+  <input type="hidden" name="feedback" id="f_feedback">
+  <input type="hidden" name="advanceAmount" id="f_advanceAmount">
+
+</form>
+
+<iframe name="hiddenFrame" style="display:none;"></iframe>
+
+</body>
+</html>
