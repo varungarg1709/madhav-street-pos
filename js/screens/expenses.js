@@ -1,7 +1,11 @@
 let expensesState = {};
-let expenseData = [];
 
 function initExpenses() {
+  if (!APP_STORE.expenseData || !APP_STORE.expenseData.length) {
+    console.warn("Expense data not ready yet");
+    return;
+  }
+
   const params = getRouteParams("expenses");
   const today = new Date().toISOString().split("T")[0];
 
@@ -62,13 +66,13 @@ function populateExpenseDropdowns() {
     });
   }
 
-  fillSelect("e_category", expenseCategories, "Expense Category");
-  fillSelect("e_account", payingAccounts, "Paying Account");
-  fillSelect("e_type", expenseTypes, "Expense Type");
-  fillSelect("e_paidBy", paidByList, "Paid by");
-  fillSelect("e_staff", staffData, "Staff name");
-  fillSelect("e_mode", expenseModes, "Expense Mode");
-  fillSelect("e_vendor", vendors, "Purchased from");
+  fillSelect("e_category", APP_STORE.expenseCategories, "Expense Category");
+  fillSelect("e_account", APP_STORE.payingAccounts, "Paying Account");
+  fillSelect("e_type", APP_STORE.expenseTypes, "Expense Type");
+  fillSelect("e_paidBy", APP_STORE.paidByList, "Paid by");
+  fillSelect("e_staff", APP_STORE.staffData, "Staff name");
+  fillSelect("e_mode", APP_STORE.expenseModes, "Expense Mode");
+  fillSelect("e_vendor", APP_STORE.vendors, "Purchased from");
 }
 
 function getSelectedExpenseTypes() {
@@ -136,7 +140,7 @@ function saveExpense() {
 
 
 function applyExpenseFilters() {
-  let filtered = [...expenseData];
+  let filtered = [...APP_STORE.expenseData];
 
   const fromDate =
     document.getElementById("expensesFromDate")?.value;
@@ -154,11 +158,15 @@ function applyExpenseFilters() {
 
   // Date filters
   if (fromDate) {
-    filtered = filtered.filter(e => e.date >= fromDate);
+    filtered = filtered.filter(e =>
+      (e.date || "").slice(0,10) >= fromDate
+    );
   }
 
   if (toDate) {
-    filtered = filtered.filter(e => e.date <= toDate);
+    filtered = filtered.filter(e =>
+      (e.date || "").slice(0,10) <= toDate
+    );
   }
 
   // Partner filter

@@ -1,0 +1,31 @@
+<div id="itemsScreen" class="screen">
+
+  <h2>Items Analytics</h2>
+
+  <div class="filters-row">
+    <input type="date" id="itemsFromDate">
+    <input type="date" id="itemsToDate">
+
+    <select id="itemsCategoryFilter">
+      <option value="">All Categories</option>
+    </select>
+
+    <input type="text"
+      id="itemsSearch"
+      placeholder="Search item name">
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Item Name</th>
+        <th>Category</th>
+        <th>Qty Sold</th>
+        <th>Total Revenue</th>
+      </tr>
+    </thead>
+    <tbody id="itemsStatsTableBody"></tbody>
+  </table>
+
+</div>

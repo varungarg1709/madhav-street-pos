@@ -1,0 +1,27 @@
+<!-- ================= BOOKINGS ================= -->
+<div id="bookingsScreen" class="screen" style="display:none;">
+  <div class="bookings-container">
+
+    <div class="booking-card">
+      <h2>Add Booking</h2>
+
+      <div class="booking-form-grid">
+        <input type="date" id="b_date">
+        <input type="text" id="b_customer" placeholder="Customer name">
+        <input type="text" id="b_phone" placeholder="Phone">
+        <select id="b_eventType"></select>
+        <input type="number" id="b_members" placeholder="Total members">
+        <select id="b_tables" multiple></select>
+        <input type="number" id="b_advance" placeholder="Advance amount">
+      </div>
+
+      <button class="save-btn" onclick="saveBooking()">Save Booking</button>
+    </div>
+
+    <div class="booking-list-card">
+      <h2>Upcoming Bookings</h2>
+      <div id="bookingDashboard"></div>
+    </div>
+
+  </div>
+</div>

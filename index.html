@@ -2,10 +2,19 @@
 <html>
 <head>
   <title>Madhav Street POS - Dashboard</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/base.css">
+<!-- <link rel="stylesheet" href="css/pos.css">
+<link rel="stylesheet" href="css/orders.css">
+<link rel="stylesheet" href="css/bookings.css">
+<link rel="stylesheet" href="css/expenses.css">
+<link rel="stylesheet" href="css/settings.css"> -->
+<link rel="stylesheet" href="css/print.css">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 </head>
 <body>
@@ -65,157 +74,9 @@
 
   <!-- Main Content -->
   <div class="main-content">
+<div id="screenContainer"></div>
 
 
-<!-- ================= POS SCREEN ================= -->
-<div id="posScreen" class="screen">
-  <div class="container">
-
-    <!-- Menu -->
-    <div class="menu">
-      <input 
-        type="text" 
-        id="menuSearch" 
-        placeholder="Search item…" 
-        class="menu-search"
-        oninput="filterMenu()"
-      />
-
-      <div class="categories" id="categoryBar"></div>
-      <div class="menu-grid" id="menuGrid"></div>
-    </div>
-
-    <!-- Bill -->
-    <div class="bill">
-      <div class="bill-content">
-
-        <!-- Bill Header -->
-        <div class="card bill-header">
-          Bill No: <span id="billNumber">MS/--/----/---</span>
-        </div>
-
-        <!-- Top Controls -->
-        <div class="card">
-          <div class="top-controls">
-            <input type="date" id="orderDate">
-            <select id="tableNo" multiple size="3"></select>
-            <input type="text" id="customerName" placeholder="Customer name">
-            <select id="orderSource"></select>
-          </div>
-
-          <div class="order-type" id="orderTypeContainer"></div>
-        </div>
-
-        <!-- Items -->
-        <div class="card bill-items" id="billItems">
-          <div class="empty-text">Tap menu items to add</div>
-        </div>
-
-        <!-- Totals -->
-        <div class="card totals-box">
-          <div class="total-row">
-            <span>Subtotal</span>
-            <span>₹<span id="subtotal">0</span></span>
-          </div>
-
-          <input type="number" id="discount" placeholder="Discount ₹" oninput="renderBill()">
-
-          <div class="final-total">
-            <span>Total</span>
-            <span>₹<span id="total">0</span></span>
-          </div>
-        </div>
-
-        <!-- Order Details -->
-        <div class="card extra-details">
-          <h4>Order Details</h4>
-
-          <div class="details-grid">
-            <div class="phone-row">
-              <input 
-  type="text" 
-  id="phone" 
-  placeholder="Phone"
-  oninput="autoFillCustomerFromPhone()"
->
-
-              <label class="wa-toggle">
-                <input type="checkbox" id="sendWhatsapp">
-                <span>WhatsApp</span>
-              </label>
-            </div>
-
-            <input type="number" id="totalMembers" placeholder="Total members">
-            <select id="eventType"></select>
-            <select id="deliveredBy"></select>
-            <input type="number" id="review" min="1" max="5" placeholder="Review (1–5)">
-          </div>
-
-          <textarea id="feedback" placeholder="Feedback"></textarea>
-        </div>
-
-        <!-- Payment -->
-        <div class="card payment-section">
-          <h4>Payment</h4>
-
-          <!-- Payment Receiver -->
-  <div class="receiver-row">
-    <label>Received by:</label>
-    <div class="receiver-options">
-      <label>
-        <input type="radio" name="receivedBy" value="Varun Garg" checked>
-        Varun Garg
-      </label>
-      <label>
-        <input type="radio" name="receivedBy" value="Amit Nagpal">
-        Amit Nagpal
-      </label>
-      <label>
-        <input type="radio" name="receivedBy" value="Cash Counter">
-        Cash Counter
-      </label>
-    </div>
-  </div>
-
-
-          <div class="pay-row">
-            <label>Cash</label>
-            <input type="number" id="cashAmount" oninput="updatePaymentStatus()">
-          </div>
-
-          <div class="pay-row">
-            <label>UPI</label>
-            <input type="number" id="upiAmount" oninput="updatePaymentStatus()">
-          </div>
-
-          <div class="pay-row">
-            <label>Card</label>
-            <input type="number" id="cardAmount" oninput="updatePaymentStatus()">
-          </div>
-
-          <div class="payment-summary">
-            <span>Paid: ₹<span id="paidTotal">0</span></span>
-            <span id="paymentStatus">Pending</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Bottom Buttons -->
-      <div class="btn-row">
-        <button class="clear-btn" onclick="clearBill()">Clear</button>
-        <button class="print-btn" onclick="printBill()">Print</button>
-        <button class="save-btn" onclick="saveBill()">Save</button>
-      </div>
-
-      <!-- Mobile Bill Button -->
-      <button id="mobileBillBtn" class="mobile-bill-btn" onclick="toggleBill()">
-        View Bill (₹<span id="mobileTotal">0</span>)
-      </button>
-
-    </div>
-  </div>
-</div>
 
 <!-- ================= PRINTABLE BILL ================= -->
 <div id="printArea" class="print-area">
@@ -261,321 +122,21 @@
   </div>
 </div>
 
-<!-- ================= BOOKINGS ================= -->
-<div id="bookingsScreen" class="screen" style="display:none;">
-  <div class="bookings-container">
-
-    <div class="booking-card">
-      <h2>Add Booking</h2>
-
-      <div class="booking-form-grid">
-        <input type="date" id="b_date">
-        <input type="text" id="b_customer" placeholder="Customer name">
-        <input type="text" id="b_phone" placeholder="Phone">
-        <select id="b_eventType"></select>
-        <input type="number" id="b_members" placeholder="Total members">
-        <select id="b_tables" multiple></select>
-        <input type="number" id="b_advance" placeholder="Advance amount">
-      </div>
-
-      <button class="save-btn" onclick="saveBooking()">Save Booking</button>
-    </div>
-
-    <div class="booking-list-card">
-      <h2>Upcoming Bookings</h2>
-      <div id="bookingDashboard"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ================= ORDERS ================= -->
-<!-- ================= ORDERS SCREEN ================= -->
-
-<div id="ordersScreen" class="screen" style="display:none;">
-  <div class="page-header">
-  <h2>Owner Dashboard</h2>
-</div>
-
-<div id="salesSummary"></div>
-<div id="partnerStats"></div>
-
-
-  <!-- Filters -->
-  <div class="orders-filters">
-  <label>From</label>
-  <input type="date" id="ordersFromDate" onchange="applyOrderFilters()">
-
-  <label>To</label>
-  <input type="date" id="ordersToDate" onchange="applyOrderFilters()">
-
-  <input
-    type="text"
-    id="filterCustomer"
-    placeholder="Customer name"
-    oninput="applyOrderFilters()"
-  >
-
-  <input
-    type="text"
-    id="filterPhone"
-    placeholder="Phone"
-    oninput="applyOrderFilters()"
-  >
-
-  <select id="filterStatus" onchange="applyOrderFilters()">
-    <option value="">All Status</option>
-    <option value="Pending">Pending</option>
-    <option value="Partial">Partial</option>
-    <option value="Paid">Paid</option>
-  </select>
-
-  <label class="pending-toggle">
-    <input type="checkbox" id="pendingOnly" onchange="applyOrderFilters()">
-    Pending only
-  </label>
-</div>
-
-
-
-  <!-- Orders Table -->
-  <div class="orders-table-card">
-    <table class="orders-table">
-      <thead>
-        <tr>
-        <th>S.No</th>
-          <th>Bill No</th>
-          <th>Date</th>
-          <th>Customer</th>
-          <th>Phone</th>
-          <th>Table</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="ordersTableBody"></tbody>
-    </table>
-  </div>
-</div>
-
-
-
-<!-- ================= EXPENSES ================= -->
-<div id="expensesScreen" class="screen" style="display:none;">
-  <div class="page-container">
-
-    <!-- Header Row -->
-    <div class="page-header">
-      <h2>Expenses</h2>
-      <button class="primary-btn" onclick="openExpenseDrawer()">
-        + Add Expense
-      </button>
-    </div>
-
-    <!-- Stats Row -->
-    <div id="expenseSummary" class="summary-grid"></div>
-
-    <!-- Filters -->
-    <div class="card filter-card">
-  <div class="filter-row">
-
-    <div class="filter-group">
-      <label>From</label>
-      <input type="date" id="expensesFromDate"
-             onchange="applyExpenseFilters()">
-    </div>
-
-    <div class="filter-group">
-      <label>To</label>
-      <input type="date" id="expensesToDate"
-             onchange="applyExpenseFilters()">
-    </div>
-
-    <div class="filter-group">
-      <label>Partner</label>
-      <select id="expensesPartnerFilter"
-              onchange="applyExpenseFilters()">
-        <option value="">All</option>
-        <option value="Varun Garg">Varun</option>
-        <option value="Amit Nagpal">Amit</option>
-        <option value="Cash Counter">Cash Counter</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label>Status</label>
-      <select id="expensesPendingFilter"
-              onchange="applyExpenseFilters()">
-        <option value="">All</option>
-        <option value="pending">Pending only</option>
-        <option value="cleared">Cleared only</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label>Sort by</label>
-      <select id="expensesSort"
-              onchange="applyExpenseFilters()">
-        <option value="date_desc">Date ↓</option>
-        <option value="date_asc">Date ↑</option>
-        <option value="amount_desc">Amount ↓</option>
-        <option value="amount_asc">Amount ↑</option>
-      </select>
-    </div>
-
-  </div>
-</div>
-
-
-    <!-- Expenses Table -->
-    <div class="card">
-      <div class="card-header">
-        <h3>Expenses List</h3>
-      </div>
-
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-                <th>S.No</th>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Type</th>
-              <th>Vendor</th>
-              <th>Mode</th>
-              <th>Partner</th>
-              <th>Amount</th>
-              <th>Comment</th>
-            </tr>
-          </thead>
-          <tbody id="expensesTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-
-  
-
-</div>
-
-
-<div id="expenseDrawer" class="drawer">
-
-  <!-- HEADER -->
-  <div class="drawer-header">
-    <h3>Add Expense</h3>
-    <button class="drawer-close" onclick="closeExpenseDrawer()">
-      ✕
-    </button>
-  </div>
-
-  <!-- BODY -->
-  <div class="drawer-body">
-
-    <div class="form-grid">
-
-      <input type="date" id="e_date">
-
-      <select id="e_category"></select>
-      <input type="number" id="e_amount" placeholder="Amount paid">
-      <select id="e_account"></select>
-
-      <select id="e_type" multiple size="4"></select>
-
-      <select id="e_paidBy"></select>
-      <select id="e_staff"></select>
-
-      <select id="e_mode"></select>
-      <select id="e_vendor"></select>
-
-      <input type="text" id="e_comment" placeholder="Comment">
-
-    </div>
-
-  </div>
-
-  <!-- FOOTER FIXED -->
-  <div class="drawer-footer">
-    <button class="secondary-btn"
-            onclick="closeExpenseDrawer()">
-      Close
-    </button>
-
-    <button class="primary-btn"
-            onclick="saveExpense()">
-      Save Expense
-    </button>
-  </div>
-
-</div>
-
-
-<div id="itemsScreen" style="display:none;">
-
-  <h2>Items Analytics</h2>
-
-  <div class="filters-row">
-    <input type="date" id="itemsFromDate">
-    <input type="date" id="itemsToDate">
-
-    <select id="itemsCategoryFilter">
-      <option value="">All Categories</option>
-    </select>
-
-    <input type="text"
-      id="itemsSearch"
-      placeholder="Search item name">
-  </div>
-
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>S.No</th>
-        <th>Item Name</th>
-        <th>Category</th>
-        <th>Qty Sold</th>
-        <th>Total Revenue</th>
-      </tr>
-    </thead>
-    <tbody id="itemsStatsTableBody"></tbody>
-  </table>
-
-</div>
-
-<!-- ================= SETTINGS ================= -->
-<div id="settingsScreen" class="screen" style="display:none;">
-
-  <div class="page-header">
-    <h2>Settings</h2>
-  </div>
-
-  <div id="settingsContainer"></div>
-
-</div>
-
-
-
-
 
 <iframe name="hiddenFrame" style="display:none;"></iframe>
 
-<script src="js/items.js"></script>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
 <script src="js/app.js"></script>
-<script src="js/pos.js"></script>
-<script src="js/bookings.js"></script>
+
 <script src="js/utils/queryManager.js"></script>
-<script src="js/orders.js"></script>
-<script src="js/expenses.js"></script>
-<script src="js/settings.js"></script>
 
 
 <!-- ================= HIDDEN FORMS ================= -->
 
-<form id="hiddenForm" method="POST" target="hiddenFrame"
-  action="https://script.google.com/macros/s/AKfycbzjUEudtEexSWR2RCS3FCTEdUP9scpwyi7Pou64p0m_GQMOsXptazuLmW8qjPGv0VBd/exec">
+<form id="hiddenForm" method="POST" target="hiddenFrame" action="">
 
+  <input type="hidden" name="apiKey" value="MadhavStreetSecret">
   <!-- edit support -->
   <input type="hidden" name="billNo" id="f_billNo">
 
@@ -597,13 +158,13 @@
   <input type="hidden" name="feedback" id="f_feedback">
 </form>
 
-<form id="bookingForm" method="POST" target="hiddenFrame"
-  action="https://script.google.com/macros/s/AKfycbzjUEudtEexSWR2RCS3FCTEdUP9scpwyi7Pou64p0m_GQMOsXptazuLmW8qjPGv0VBd/exec">
+<form id="bookingForm" method="POST" target="hiddenFrame" action="">
+  <input type="hidden" name="apiKey" value="MadhavStreetSecret">
   <input type="hidden" name="mode" value="booking">
 </form>
 
-<form id="expenseForm" method="POST" target="hiddenFrame"
-  action="https://script.google.com/macros/s/AKfycbzjUEudtEexSWR2RCS3FCTEdUP9scpwyi7Pou64p0m_GQMOsXptazuLmW8qjPGv0VBd/exec">
+<form id="expenseForm" method="POST" target="hiddenFrame" action="">
+<input type="hidden" name="apiKey" value="MadhavStreetSecret">
 
   <input type="hidden" name="mode" value="expense">
   <input type="hidden" name="expenseDate" id="f_e_date">

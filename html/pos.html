@@ -1,0 +1,149 @@
+<!-- ================= POS SCREEN ================= -->
+<div id="posScreen" class="screen">
+  <div class="container">
+
+    <!-- Menu -->
+    <div class="menu">
+      <input 
+        type="text" 
+        id="menuSearch" 
+        placeholder="Search item…" 
+        class="menu-search"
+        oninput="filterMenu()"
+      />
+
+      <div class="categories" id="categoryBar"></div>
+      <div class="menu-grid" id="menuGrid"></div>
+    </div>
+
+    <!-- Bill -->
+    <div class="bill">
+      <div class="bill-content">
+
+        <!-- Bill Header -->
+        <div class="card bill-header">
+          Bill No: <span id="billNumber">MS/--/----/---</span>
+        </div>
+
+        <!-- Top Controls -->
+        <div class="card">
+          <div class="top-controls">
+            <input type="date" id="orderDate">
+            <select id="tableNo" multiple size="3"></select>
+            <input type="text" id="customerName" placeholder="Customer name">
+            <select id="orderSource"></select>
+          </div>
+
+          <div class="order-type" id="orderTypeContainer"></div>
+        </div>
+
+        <!-- Items -->
+        <div class="card bill-items" id="billItems">
+          <div class="empty-text">Tap menu items to add</div>
+        </div>
+
+        <!-- Totals -->
+        <div class="card totals-box">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <span>₹<span id="subtotal">0</span></span>
+          </div>
+
+          <input type="number" id="discount" placeholder="Discount ₹" oninput="renderBill()">
+
+          <div class="final-total">
+            <span>Total</span>
+            <span>₹<span id="total">0</span></span>
+          </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="card extra-details">
+          <h4>Order Details</h4>
+
+          <div class="details-grid">
+            <div class="phone-row">
+              <input 
+  type="text" 
+  id="phone" 
+  placeholder="Phone"
+  oninput="autoFillCustomerFromPhone()"
+>
+
+              <label class="wa-toggle">
+                <input type="checkbox" id="sendWhatsapp">
+                <span>WhatsApp</span>
+              </label>
+            </div>
+
+            <input type="number" id="totalMembers" placeholder="Total members">
+            <select id="eventType"></select>
+            <select id="deliveredBy"></select>
+            <input type="number" id="review" min="1" max="5" placeholder="Review (1–5)">
+          </div>
+
+          <textarea id="feedback" placeholder="Feedback"></textarea>
+        </div>
+
+        <!-- Payment -->
+        <div class="card payment-section">
+          <h4>Payment</h4>
+
+          <!-- Payment Receiver -->
+  <div class="receiver-row">
+    <label>Received by:</label>
+    <div class="receiver-options">
+      <label>
+        <input type="radio" name="receivedBy" value="Varun Garg" checked>
+        Varun Garg
+      </label>
+      <label>
+        <input type="radio" name="receivedBy" value="Amit Nagpal">
+        Amit Nagpal
+      </label>
+      <label>
+        <input type="radio" name="receivedBy" value="Cash Counter">
+        Cash Counter
+      </label>
+    </div>
+  </div>
+
+
+          <div class="pay-row">
+            <label>Cash</label>
+            <input type="number" id="cashAmount" oninput="updatePaymentStatus()">
+          </div>
+
+          <div class="pay-row">
+            <label>UPI</label>
+            <input type="number" id="upiAmount" oninput="updatePaymentStatus()">
+          </div>
+
+          <div class="pay-row">
+            <label>Card</label>
+            <input type="number" id="cardAmount" oninput="updatePaymentStatus()">
+          </div>
+
+          <div class="payment-summary">
+            <span>Paid: ₹<span id="paidTotal">0</span></span>
+            <span id="paymentStatus">Pending</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Buttons -->
+      <div class="btn-row">
+        <button class="clear-btn" onclick="clearBill()">Clear</button>
+        <button class="print-btn" onclick="printBill()">Print</button>
+        <button class="save-btn" onclick="saveBill()">Save</button>
+      </div>
+
+      <!-- Mobile Bill Button -->
+      <button id="mobileBillBtn" class="mobile-bill-btn" onclick="toggleBill()">
+        View Bill (₹<span id="mobileTotal">0</span>)
+      </button>
+
+    </div>
+  </div>
+</div>

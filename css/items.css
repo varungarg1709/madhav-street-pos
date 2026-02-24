@@ -1,0 +1,117 @@
+/* ================= ITEMS SCREEN ================= */
+
+#itemsScreen {
+  padding: 16px;
+}
+
+/* Title */
+#itemsScreen h2 {
+  margin: 0 0 16px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* ================= FILTER ROW ================= */
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.filters-row input,
+.filters-row select {
+  height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+#itemsSearch {
+  flex: 1;
+  min-width: 220px;
+}
+
+/* ================= TABLE ================= */
+
+#itemsScreen .data-table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+#itemsScreen .data-table th {
+  background: #222;
+  color: white;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+#itemsScreen .data-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+#itemsScreen .data-table tr:hover {
+  background: #fafafa;
+}
+
+/* Qty highlight */
+#itemsScreen .data-table td:nth-child(4) {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* Revenue highlight */
+#itemsScreen .data-table td:nth-child(5) {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* Empty state */
+#itemsScreen .data-table td[colspan] {
+  text-align: center;
+  padding: 30px;
+  color: #888;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-row input,
+  .filters-row select {
+    width: 100%;
+    min-width: unset;
+  }
+
+  #itemsSearch {
+    width: 100%;
+  }
+
+  #itemsScreen .data-table {
+    font-size: 13px;
+  }
+
+  #itemsScreen .data-table th,
+  #itemsScreen .data-table td {
+    padding: 8px;
+  }
+}

@@ -1,0 +1,81 @@
+<!-- ================= ORDERS ================= -->
+<!-- ================= ORDERS SCREEN ================= -->
+
+<div id="ordersScreen" class="screen">
+  <div class="page-header">
+  <h2>Order Dashboard</h2>
+</div>
+
+<div class="period-toggle">
+  <button id="periodToday" class="active"
+          onclick="setDashboardPeriod('today')">
+    TODAY
+  </button>
+
+  <button id="periodMonth"
+          onclick="setDashboardPeriod('month')">
+    THIS MONTH
+  </button>
+</div>
+
+<div id="salesSummary"></div>
+<div id="partnerStats"></div>
+
+
+  <!-- Filters -->
+  <div class="orders-filters">
+  <label>From</label>
+  <input type="date" id="ordersFromDate" onchange="applyOrderFilters()">
+
+  <label>To</label>
+  <input type="date" id="ordersToDate" onchange="applyOrderFilters()">
+
+  <input
+    type="text"
+    id="filterCustomer"
+    placeholder="Customer name"
+    oninput="applyOrderFilters()"
+  >
+
+  <input
+    type="text"
+    id="filterPhone"
+    placeholder="Phone"
+    oninput="applyOrderFilters()"
+  >
+
+  <select id="filterStatus" onchange="applyOrderFilters()">
+    <option value="">All Status</option>
+    <option value="Pending">Pending</option>
+    <option value="Partial">Partial</option>
+    <option value="Paid">Paid</option>
+  </select>
+
+  <label class="pending-toggle">
+    <input type="checkbox" id="pendingOnly" onchange="applyOrderFilters()">
+    Pending only
+  </label>
+</div>
+
+
+
+  <!-- Orders Table -->
+  <div class="orders-table-card">
+    <table class="orders-table">
+      <thead>
+        <tr>
+        <th>S.No</th>
+          <th>Bill No</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Phone</th>
+          <th>Table</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody"></tbody>
+    </table>
+  </div>
+</div>

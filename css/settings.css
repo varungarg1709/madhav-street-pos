@@ -1,0 +1,20 @@
+.settings-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:16px;
+}
+
+.settings-card {
+  margin-bottom:20px;
+}
+
+.settings-table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+.settings-table th {
+  background:#222;
+  color:white;
+  padding:10px;
+}

@@ -1,0 +1,147 @@
+<!-- ================= EXPENSES ================= -->
+<div id="expensesScreen" class="screen">
+  <div class="page-container">
+
+    <!-- Header Row -->
+    <div class="page-header">
+      <h2>Expenses</h2>
+      <button class="primary-btn" onclick="openExpenseDrawer()">
+        + Add Expense
+      </button>
+    </div>
+
+    <!-- Stats Row -->
+    <div id="expenseSummary" class="summary-grid"></div>
+
+    <!-- Filters -->
+    <div class="card filter-card">
+  <div class="filter-row">
+
+    <div class="filter-group">
+      <label>From</label>
+      <input type="date" id="expensesFromDate"
+             onchange="applyExpenseFilters()">
+    </div>
+
+    <div class="filter-group">
+      <label>To</label>
+      <input type="date" id="expensesToDate"
+             onchange="applyExpenseFilters()">
+    </div>
+
+    <div class="filter-group">
+      <label>Partner</label>
+      <select id="expensesPartnerFilter"
+              onchange="applyExpenseFilters()">
+        <option value="">All</option>
+        <option value="Varun Garg">Varun</option>
+        <option value="Amit Nagpal">Amit</option>
+        <option value="Cash Counter">Cash Counter</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Status</label>
+      <select id="expensesPendingFilter"
+              onchange="applyExpenseFilters()">
+        <option value="">All</option>
+        <option value="pending">Pending only</option>
+        <option value="cleared">Cleared only</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Sort by</label>
+      <select id="expensesSort"
+              onchange="applyExpenseFilters()">
+        <option value="date_desc">Date ↓</option>
+        <option value="date_asc">Date ↑</option>
+        <option value="amount_desc">Amount ↓</option>
+        <option value="amount_asc">Amount ↑</option>
+      </select>
+    </div>
+
+  </div>
+</div>
+
+
+    <!-- Expenses Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Expenses List</h3>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+                <th>S.No</th>
+              <th>Date</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Vendor</th>
+              <th>Mode</th>
+              <th>Partner</th>
+              <th>Amount</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody id="expensesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  
+  <div id="expenseDrawer" class="drawer">
+
+  <!-- HEADER -->
+  <div class="drawer-header">
+    <h3>Add Expense</h3>
+    <button class="drawer-close" onclick="closeExpenseDrawer()">
+      ✕
+    </button>
+  </div>
+
+  <!-- BODY -->
+  <div class="drawer-body">
+
+    <div class="form-grid">
+
+      <input type="date" id="e_date">
+
+      <select id="e_category"></select>
+      <input type="number" id="e_amount" placeholder="Amount paid">
+      <select id="e_account"></select>
+
+      <select id="e_type" multiple size="4"></select>
+
+      <select id="e_paidBy"></select>
+      <select id="e_staff"></select>
+
+      <select id="e_mode"></select>
+      <select id="e_vendor"></select>
+
+      <input type="text" id="e_comment" placeholder="Comment">
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER FIXED -->
+  <div class="drawer-footer">
+    <button class="secondary-btn"
+            onclick="closeExpenseDrawer()">
+      Close
+    </button>
+
+    <button class="primary-btn"
+            onclick="saveExpense()">
+      Save Expense
+    </button>
+  </div>
+
+</div>
+
+</div>

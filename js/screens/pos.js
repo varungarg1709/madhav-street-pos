@@ -4,6 +4,10 @@ let currentTable = "GENERAL";
 let editingBillNo = null; // for future edit support
 
 function initPOS() {
+  if (!APP_STORE.loaded) {
+    console.warn("Store not loaded yet");
+    return;
+  }
   setupPOS();
   populateOrderDetails();
 }
@@ -15,7 +19,7 @@ function setupPOS() {
   // Tables
   const tableSelect = document.getElementById("tableNo");
   tableSelect.innerHTML = "";
-  tableData.forEach(t => {
+  (APP_STORE.tableData || []).forEach(t => {
     const opt = document.createElement("option");
     opt.value = t;
     opt.textContent = t;
@@ -28,7 +32,7 @@ function setupPOS() {
   // Order sources
   const sourceSelect = document.getElementById("orderSource");
   sourceSelect.innerHTML = "";
-  orderSources.forEach(src => {
+  (APP_STORE.orderSources || []).forEach(src => {
     const opt = document.createElement("option");
     opt.value = src;
     opt.textContent = src;
@@ -38,7 +42,7 @@ function setupPOS() {
   // Order types
   const typeContainer = document.getElementById("orderTypeContainer");
   typeContainer.innerHTML = "";
-  orderTypes.forEach((type, index) => {
+  (APP_STORE.orderTypes || []).forEach((type, index) => {
     const label = document.createElement("label");
     label.innerHTML = `
       <input type="radio" name="orderType" value="${type}" ${index === 0 ? "checked" : ""}>
@@ -48,7 +52,7 @@ function setupPOS() {
   });
 
   // Categories
-  categories = [...new Set(menuData.map(i => i.category))].sort();
+  categories = [...new Set((APP_STORE.menuData || []).map(i => i.category))].sort();
   
   renderCategories();
 
@@ -122,7 +126,7 @@ function showCategory(category) {
     btn.classList.toggle("active", btn.innerText === category);
   });
 
-  menuData
+  (APP_STORE.menuData || [])
   .filter(i => i.category === category)
   .forEach(item => {
     grid.appendChild(createMenuItemButton(item));
@@ -135,7 +139,7 @@ function filterMenu() {
   const grid = document.getElementById("menuGrid");
   grid.innerHTML = "";
 
-  let filtered = menuData.filter(item =>
+  let filtered = (APP_STORE.menuData|| []).filter(item =>
     item.item.toLowerCase().includes(query)
   );
 
@@ -550,7 +554,7 @@ function populateOrderDetails() {
   const eventSelect = document.getElementById("eventType");
   if (eventSelect) {
     eventSelect.innerHTML = '<option value="">Event type</option>';
-    eventTypes.forEach(type => {
+    (APP_STORE.eventTypes || []).forEach(type => {
       const opt = document.createElement("option");
       opt.value = type;
       opt.textContent = type;
@@ -562,7 +566,7 @@ function populateOrderDetails() {
   const staffSelect = document.getElementById("deliveredBy");
   if (staffSelect) {
     staffSelect.innerHTML = '<option value="">Delivered by</option>';
-    staffData.forEach(name => {
+    (APP_STORE.staffData || []).forEach(name => {
       const opt = document.createElement("option");
       opt.value = name;
       opt.textContent = name;
@@ -580,7 +584,7 @@ function showAllItems() {
   const grid = document.getElementById("menuGrid");
   grid.innerHTML = "";
 
-  menuData.forEach(item => {
+  (APP_STORE.menuData || []).forEach(item => {
     grid.appendChild(createMenuItemButton(item));
   });
 }
@@ -656,14 +660,14 @@ function autoFillCustomerFromPhone() {
   const nameInput = document.getElementById("customerName");
 
   if (!phoneInput || !nameInput) return;
-  if (!orderData || !orderData.length) return;
+  if (!APP_STORE.orderData || !APP_STORE.orderData.length) return;
 
   let phone = phoneInput.value.replace(/\D/g, ""); // digits only
 
   if (phone.length < 10) return;
 
   // search latest orders first
-  const match = orderData
+  const match = APP_STORE.orderData
     .slice()
     .reverse()
     .find(o => {

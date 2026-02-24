@@ -1,0 +1,179 @@
+/* ================= ORDER DASHBOARD PRO ================= */
+
+.page-header {
+  margin-bottom: 12px;
+}
+
+.page-title {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* ===== PERIOD TOGGLE ===== */
+
+.period-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.period-toggle button {
+  flex: unset;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.period-toggle button.active {
+  background: #ff6a00;
+  color: white;
+  border-color: #ff6a00;
+}
+
+/* ===== SALES CARDS ===== */
+
+#salesSummary,
+#partnerStats {
+  margin-bottom: 14px;
+}
+
+.sales-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+  gap: 12px;
+}
+
+.sales-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-height: 72px;
+}
+
+.sales-card span {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  margin-top: 4px;
+}
+
+/* Color accents */
+.card-total   { border-left: 5px solid #3b82f6; background:#f8fbff; }
+.card-cash    { border-left: 5px solid #22c55e; background:#f7fff9; }
+.card-upi     { border-left: 5px solid #8b5cf6; background:#fbf8ff; }
+.card-avg     { border-left: 5px solid #f59e0b; background:#fffaf3; }
+.card-pending { border-left: 5px solid #ef4444; background:#fff6f6; }
+
+.card-varun   { border-left: 5px solid #06b6d4; }
+.card-amit    { border-left: 5px solid #a855f7; }
+.card-counter { border-left: 5px solid #64748b; }
+
+#partnerStats .sales-card {
+  min-height: 60px;
+}
+
+#partnerStats .sales-card span {
+  font-size: 20px;
+}
+
+/* ===== FILTER CARD ===== */
+
+.filter-card {
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-group input,
+.filter-group select {
+  background: #fff;
+  min-width: 140px;
+}
+
+/* ===== ORDERS TABLE ===== */
+
+.orders-table-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.orders-table th {
+  background: #222;
+  color: white;
+  padding: 10px;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.orders-table td {
+  padding: 9px 10px;
+  border-top: 1px solid #eee;
+}
+
+.orders-table tr:hover {
+  background: #fafafa;
+}
+
+/* Status badge */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-paid {
+  background:#e6f7ed;
+  color:#0a7a36;
+}
+
+.status-pending {
+  background:#ffe8e8;
+  color:#b30000;
+}
+
+.status-partial {
+  background:#fff3e0;
+  color:#cc7a00;
+}
+
+/* Edit button */
+.orders-table button {
+  background: #ff6a00;
+  color: white;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.orders-table button:hover {
+  background: #e65f00;
+}

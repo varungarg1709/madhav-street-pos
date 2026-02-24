@@ -442,28 +442,6 @@ button {
   margin-top: 10px;
 }
 
-/* ================= SALES DASHBOARD ================= */
-.sales-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.sales-card {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.sales-card span {
-  display: block;
-  font-size: 22px;
-  margin-top: 5px;
-}
-
 .top-nav button {
   background: #444;
   border: none;
@@ -1155,9 +1133,9 @@ button {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
 }
 
 .summary-card {
@@ -1325,30 +1303,6 @@ button {
   margin-bottom: 20px;
 }
 
-.sales-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
-}
-
-.sales-card {
-  background: #ffffff;
-  padding: 18px;
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.sales-card span {
-  display: block;
-  font-size: 26px;
-  font-weight: 700;
-  margin-top: 6px;
-}
-
-
 .filter-row {
   display: flex;
   flex-wrap: wrap;
@@ -1467,4 +1421,126 @@ button {
 
 .settings-table button.danger {
   background: #ff4d4d;
+}
+
+
+.stat-card {
+  padding: 16px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.stat-sales { border-left: 5px solid #3b82f6; }   /* Blue */
+.stat-cash { border-left: 5px solid #22c55e; }    /* Green */
+.stat-upi { border-left: 5px solid #8b5cf6; }     /* Purple */
+.stat-avg { border-left: 5px solid #f59e0b; }     /* Orange */
+.stat-pending { border-left: 5px solid #ef4444; } /* Red */
+
+/* ================= OWNER DASHBOARD STATS ================= */
+
+#salesSummary,
+#partnerStats {
+  margin-bottom: 16px;
+}
+
+.sales-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.sales-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  min-height: 80px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sales-card span {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 6px;
+  color: #111;
+}
+
+/* Color accents */
+.card-total   { border-left: 5px solid #3b82f6; }
+.card-cash    { border-left: 5px solid #22c55e; }
+.card-upi     { border-left: 5px solid #8b5cf6; }
+.card-avg     { border-left: 5px solid #f59e0b; }
+.card-pending { border-left: 5px solid #ef4444; }
+
+.card-varun   { border-left: 5px solid #06b6d4; }
+.card-amit    { border-left: 5px solid #a855f7; }
+.card-counter { border-left: 5px solid #64748b; }
+
+
+#partnerStats .sales-card {
+  min-height: 65px;
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+#partnerStats .sales-card span {
+  font-size: 22px;
+}
+
+#salesSummary {
+  margin-bottom: 10px;
+}
+
+#partnerStats {
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0 0 14px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.card-total   { background:#f8fbff; }
+.card-cash    { background:#f7fff9; }
+.card-upi     { background:#fbf8ff; }
+.card-avg     { background:#fffaf3; }
+.card-pending { background:#fff6f6; }
+
+/* ===== Dashboard Period Toggle ===== */
+
+.period-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.period-toggle button {
+  flex: unset;
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #444;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.period-toggle button.active {
+  background: #ff6a00;
+  color: white;
+  border-color: #ff6a00;
+}
+
+.period-toggle button:hover {
+  background: #fff3eb;
 }

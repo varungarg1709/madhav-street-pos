@@ -1,47 +1,29 @@
 let menuMap = {};
-let itemsState = {};
-let itemsInitializing = false;
 let itemsListenersAttached = false;
 
 /* ================= INIT ================= */
 
 function initItemsStats() {
 
-    menuMap = {};
+  if (!APP_STORE.loaded) return;
 
-menuData.forEach(m => {
-  menuMap[m.item.trim().toLowerCase()] = m;
-});
-
-  itemsInitializing = true;
-
-  const today = new Date().toISOString().split("T")[0];
-
-  itemsState = {
-    from: today,
-    to: today,
-    category: "",
-    search: ""
-  };
-
-  const from = document.getElementById("itemsFromDate");
-  const to = document.getElementById("itemsToDate");
-
-  if (from) from.value = today;
-  if (to) to.value = today;
+  const menuData = APP_STORE.menuData || [];
 
   menuMap = {};
 
-menuData.forEach(m => {
-  menuMap[m.item.trim().toLowerCase()] = m;
-});
+  menuData.forEach(m => {
+    menuMap[m.item.trim().toLowerCase()] = m;
+  });
+
+  const today = new Date().toISOString().slice(0,10);
+
+  document.getElementById("itemsFromDate").value = today;
+  document.getElementById("itemsToDate").value = today;
 
   populateItemCategories();
   attachItemsListeners();
 
   applyItemsFilters();
-
-  itemsInitializing = false;
 }
 
 /* ================= CATEGORY ================= */
@@ -53,7 +35,8 @@ function populateItemCategories() {
 
   if (!select) return;
 
-  // CLEAR OLD OPTIONS (important)
+  const menuData = APP_STORE.menuData || [];
+
   select.innerHTML =
     `<option value="">All Categories</option>`;
 
@@ -71,7 +54,9 @@ function populateItemCategories() {
 /* ================= FILTER ================= */
 
 function applyItemsFilters() {
-console.log("menuData length:", menuData.length);
+
+  const orderData = APP_STORE.orderData || [];
+
   let stats = {};
 
   const from =
@@ -89,39 +74,40 @@ console.log("menuData length:", menuData.length);
 
   orderData.forEach(order => {
 
-    if (from && order.date < from) return;
-    if (to && order.date > to) return;
+    const orderDate =
+      (order.date || "").slice(0,10);
+
+    if (from && orderDate < from) return;
+    if (to && orderDate > to) return;
 
     let items = {};
 
     try {
-    if (typeof order.itemsJSON === "string") {
+      if (order.itemsJSON) {
         items = JSON.parse(order.itemsJSON);
-    }
+      }
     } catch (e) {
-    console.error("Item parse error", e);
+      console.warn("Item parse error", e);
+      return;
     }
 
     Object.keys(items).forEach(name => {
-        let raw = items[name];
 
-        let qty = 0;
+      const cleanName =
+        name.trim().toLowerCase();
 
-        if (typeof raw === "number") {
-            qty = raw;
-        }
+      let raw = items[name];
+      let qty = 0;
 
-        if (typeof raw === "object" && raw !== null) {
-            qty = Number(raw.qty || raw.quantity || 0);
-        }
+      if (typeof raw === "number")
+        qty = raw;
 
-        if (!qty) return;
+      if (typeof raw === "object" && raw)
+        qty = Number(raw.qty || raw.quantity || 0);
 
-        const menuItem =
-  menuMap[name.trim().toLowerCase()];
+      if (!qty) return;
 
-        console.log("Order Item:", name);
-console.log("Matched Menu:", menuItem);
+      const menuItem = menuMap[cleanName];
 
       const itemCategory =
         menuItem?.category || "Other";
@@ -132,32 +118,26 @@ console.log("Matched Menu:", menuItem);
       if (category && itemCategory !== category)
         return;
 
-      if (
-        search &&
-        !name.toLowerCase().includes(search)
-      )
+      if (search &&
+          !cleanName.includes(search))
         return;
 
-      if (!stats[name]) {
-        stats[name] = {
-          name,
+      if (!stats[cleanName]) {
+        stats[cleanName] = {
+          name: name.trim(),
           category: itemCategory,
           qty: 0,
           revenue: 0
         };
       }
 
-      stats[name].qty += qty;
-      stats[name].revenue += qty * price;
-
-      console.log(order.itemsJSON);
+      stats[cleanName].qty += qty;
+      stats[cleanName].revenue += qty * price;
     });
   });
 
-  
-
   const list = Object.values(stats)
-    .sort((a, b) => b.qty - a.qty);
+    .sort((a,b)=>b.qty-a.qty);
 
   renderItemsStats(list);
 }
@@ -179,12 +159,12 @@ function renderItemsStats(list) {
     return;
   }
 
-  list.forEach((item, index) => {
+  list.forEach((item,index)=>{
 
-    const tr = document.createElement("tr");
+    const tr=document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${index + 1}</td>
+      <td>${index+1}</td>
       <td>${item.name}</td>
       <td>${item.category}</td>
       <td>${item.qty}</td>
@@ -199,7 +179,6 @@ function renderItemsStats(list) {
 
 function attachItemsListeners() {
 
-  // prevent duplicate listeners
   if (itemsListenersAttached) return;
 
   ["itemsFromDate",

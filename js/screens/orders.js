@@ -1,5 +1,6 @@
 let ordersState = {};
 let ordersInitializing = false;
+let dashboardPeriod = "today";
 
 function normalizeDate(val) {
   if (!val) return "";
@@ -45,6 +46,7 @@ if (pending) pending.checked = ordersState.pending;
 
   applyOrderFilters();
   ordersInitializing = false;
+  setDashboardPeriod("today");
 }
 
 
@@ -68,7 +70,7 @@ function renderOrders(list) {
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td>${order.billNo}</td>
-      <td>${order.date || "-"}</td>
+      <td>${formatDateUI(order.date) || "-"}</td>
       <td>${order.name || "-"}</td>
       <td>${order.phone || "-"}</td>
       <td>${order.table || "-"}</td>
@@ -90,57 +92,24 @@ function renderOrders(list) {
   });
 }
 
-function renderSalesSummary(list = orderData) {
-  const container = document.getElementById("salesSummary");
-  if (!container) return;
-
-  let totalSales = 0;
-  let totalBills = 0;
-  let cash = 0;
-  let upi = 0;
-
-  list.forEach(o => {
-    if (o.status === "Paid") {
-      totalSales += Number(o.amount) || 0;
-      totalBills++;
-
-      if ((o.paymentMode || "").includes("Cash")) {
-        cash += Number(o.amount) || 0;
-      }
-      if ((o.paymentMode || "").includes("UPI")) {
-        upi += Number(o.amount) || 0;
-      }
-    }
-  });
-
-  const avgBill =
-    totalBills > 0 ? Math.round(totalSales / totalBills) : 0;
-
-  container.innerHTML = `
-    <div class="sales-grid">
-      <div class="sales-card">
-        Total Sales
-        <span>₹${totalSales}</span>
-      </div>
-      <div class="sales-card">
-        Cash
-        <span>₹${cash}</span>
-      </div>
-      <div class="sales-card">
-        UPI
-        <span>₹${upi}</span>
-      </div>
-      <div class="sales-card">
-        Avg Bill
-        <span>₹${avgBill}</span>
-      </div>
-    </div>
-  `;
-}
-
 
 function applyOrderFilters() {
-  let filtered = [...orderData];
+  let filtered = [...APP_STORE.orderData];
+
+  const today = new Date();
+const todayStr = today.toISOString().split("T")[0];
+
+// RESET date filters when dashboard toggle used
+if (dashboardPeriod === "today") {
+  document.getElementById("ordersFromDate").value = todayStr;
+  document.getElementById("ordersToDate").value = todayStr;
+}
+
+if (dashboardPeriod === "month") {
+  const monthStart = todayStr.slice(0, 7) + "-01";
+  document.getElementById("ordersFromDate").value = monthStart;
+  document.getElementById("ordersToDate").value = todayStr;
+}
 
   const fromDate = document.getElementById("ordersFromDate")?.value;
   const toDate = document.getElementById("ordersToDate")?.value;
@@ -309,26 +278,40 @@ function renderFilteredSummary(list) {
       ? Math.round(totalSales / totalBills)
       : 0;
 
+  const pendingAmount = list
+  .filter(o => o.status === "Pending" || o.status === "Partial")
+  .reduce((sum, o) => sum + Number(o.amount || 0), 0);
+
   container.innerHTML = `
-    <div class="sales-grid">
-      <div class="sales-card">
-        Total Sales
-        <span>₹${totalSales}</span>
-      </div>
-      <div class="sales-card">
-        Cash
-        <span>₹${cash}</span>
-      </div>
-      <div class="sales-card">
-        UPI
-        <span>₹${upi}</span>
-      </div>
-      <div class="sales-card">
-        Avg Bill
-        <span>₹${avgBill}</span>
-      </div>
-    </div>
-  `;
+<div class="sales-grid">
+
+  <div class="sales-card card-total">
+    Total Sales
+    <span>₹${Number(totalSales).toLocaleString("en-IN")}</span>
+  </div>
+
+  <div class="sales-card card-cash">
+    Cash
+    <span>₹${cash}</span>
+  </div>
+
+  <div class="sales-card card-upi">
+    UPI
+    <span>₹${upi}</span>
+  </div>
+
+  <div class="sales-card card-avg">
+    Avg Bill
+    <span>₹${avgBill}</span>
+  </div>
+
+  <div class="sales-card card-pending">
+    Pending
+    <span>₹${pendingAmount}</span>
+  </div>
+
+</div>
+`;
 }
 
 
@@ -356,19 +339,56 @@ function renderPartnerStats(list) {
   });
 
   container.innerHTML = `
-    <div class="sales-grid">
-      <div class="sales-card">
-        Varun
-        <span>₹${partnerTotals["Varun Garg"]}</span>
-      </div>
-      <div class="sales-card">
-        Amit
-        <span>₹${partnerTotals["Amit Nagpal"]}</span>
-      </div>
-      <div class="sales-card">
-        Cash Counter
-        <span>₹${partnerTotals["Cash Counter"]}</span>
-      </div>
-    </div>
-  `;
+<div class="sales-grid">
+
+  <div class="sales-card card-varun">
+    Varun
+    <span>₹${partnerTotals["Varun Garg"]}</span>
+  </div>
+
+  <div class="sales-card card-amit">
+    Amit
+    <span>₹${partnerTotals["Amit Nagpal"]}</span>
+  </div>
+
+  <div class="sales-card card-counter">
+    Cash Counter
+    <span>₹${partnerTotals["Cash Counter"]}</span>
+  </div>
+
+</div>
+`;
 }
+
+
+function formatDateUI(dateStr) {
+  if (!dateStr) return "";
+
+  const d = new Date(dateStr);
+
+  return d.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+function setDashboardPeriod(period) {
+
+  dashboardPeriod = period;
+
+  document
+    .getElementById("periodToday")
+    ?.classList.toggle("active", period === "today");
+
+  document
+    .getElementById("periodMonth")
+    ?.classList.toggle("active", period === "month");
+
+  applyOrderFilters();
+}
+
+window.initOrders = initOrders;
+window.applyOrderFilters = applyOrderFilters;
+window.editOrder = editOrder;
+window.setDashboardPeriod = setDashboardPeriod;
