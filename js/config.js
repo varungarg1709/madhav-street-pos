@@ -1,5 +1,5 @@
 // config.js (PRIVATE - DO NOT UPLOAD)
 
 const CONFIG = {
-  scriptURL: "https://script.google.com/macros/s/AKfycbxY8QuM7-S4eDb8gcIVL94Qm2q37RX8iLZ0b2dU0gQKCgELAqWvmJc53c101mnrKgD2/exec"
+  scriptURL: "https://script.google.com/macros/s/AKfycbxAWDXuuYN_fjQ0Nhn2VXCU5Z0CgC_SuAJPsfWz8uY0_kKWONoBEaLu7jT1x-71elPU/exec"
 };

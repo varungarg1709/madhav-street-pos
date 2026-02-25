@@ -1,0 +1,45 @@
+<div id="attendanceScreen" class="screen">
+
+  <div class="page-header">
+    <h2>Staff Attendance</h2>
+  </div>
+
+  <div class="card attendance-form">
+
+    <input type="date" id="a_date">
+    <select id="a_staff"></select>
+
+    <input type="time" id="a_checkIn">
+    <input type="time" id="a_checkOut">
+
+    <select id="a_status">
+      <option value="Present">Present</option>
+      <option value="Half Day">Half Day</option>
+      <option value="Absent">Absent</option>
+    </select>
+
+    <input type="text" id="a_notes" placeholder="Notes">
+
+    <button class="primary-btn"
+            onclick="saveAttendance()">
+      Save Attendance
+    </button>
+
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Staff</th>
+          <th>Check In</th>
+          <th>Check Out</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceTableBody"></tbody>
+    </table>
+  </div>
+
+</div>

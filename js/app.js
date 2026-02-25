@@ -17,6 +17,8 @@ const loadedAssets = {
   js:new Set()
 };
 
+window.storeReady = loadInitialData();
+
 /* ================= GLOBAL STORE ================= */
 
 window.APP_STORE = {
@@ -26,7 +28,6 @@ window.APP_STORE = {
 /* ================= SCREEN CONFIG ================= */
 
 const screenAssets = {
-
   pos:{
     css:["css/pos.css"],
     js:["js/screens/pos.js"],
@@ -61,6 +62,12 @@ const screenAssets = {
     css:["css/settings.css"],
     js:["js/screens/settings.js"],
     init:"initSettings"
+  },
+
+  attendance:{
+    css:["css/attendance.css"],
+    js:["js/screens/attendance.js"],
+    init:"initAttendance"
   }
 };
 
@@ -135,19 +142,57 @@ async function loadScreenHTML(screen) {
 
 window.onload = async function(){
 
-  setFormActions();   // ← THIS WAS MISSING
+  setFormActions();
+
+  const appLayout =
+    document.querySelector(".app-layout");
+
+  // LOGIN CHECK
+  if (!isLoggedIn()) {
+
+    appLayout.style.display = "none";
+
+    loadCSS("css/login.css");
+
+    const res = await fetch("html/login.html");
+
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      await res.text()
+    );
+
+    return;
+  }
+
+  // user already logged in
+  appLayout.style.display = "flex";
+
+  startApp();
+};
+
+async function startApp() {
 
   await loadInitialData();
-  handleRoute();
-};
+
+  // force default screen
+  if (!location.hash) {
+    navigateTo("pos");
+  } else {
+    handleRoute();
+  }
+}
 
 function navigateTo(screen){
   location.hash="/"+screen;
 }
 
 function handleRoute(){
-  let hash=location.hash.replace("#/","");
-  hash=hash.split("?")[0];
+
+  // SINGLE LOGIN CHECK
+  if(!isLoggedIn()) return;
+
+  let hash = location.hash.replace("#/","");
+  hash = hash.split("?")[0];
 
   if(!hash) hash="pos";
 
@@ -159,6 +204,9 @@ window.addEventListener("hashchange",handleRoute);
 /* ================= MAIN SCREEN LOADER ================= */
 
 async function showScreen(screen){
+  if (!APP_STORE.loaded) {
+    await loadInitialData();
+  }
 
   const assets=screenAssets[screen];
   if(!assets) return;
@@ -230,7 +278,8 @@ async function loadInitialData(){
       paidByList:data.paidByList||[],
       expenseModes:data.expenseModes||[],
       vendors:data.vendors||[],
-      expenseData:data.expenses||[]
+      expenseData:data.expenses||[],
+      attendanceData: data.attendance || []
     });
 
     APP_STORE.loaded=true;
@@ -262,16 +311,29 @@ function toggleSidebar(){
 
 function setFormActions() {
 
+  const token =
+    sessionStorage.getItem("ms_token");
+
   const forms = [
     "hiddenForm",
     "bookingForm",
-    "expenseForm"
+    "expenseForm",
+    "attendanceForm"
   ];
 
   forms.forEach(id => {
+
     const form = document.getElementById(id);
-    if (form) {
-      form.action = scriptURL;
+
+    if (!form) return;
+
+    form.action = scriptURL;
+
+    const tokenInput =
+      form.querySelector("[name='token']");
+
+    if (tokenInput) {
+      tokenInput.value = token;
     }
   });
 }

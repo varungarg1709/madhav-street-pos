@@ -20,15 +20,7 @@
 <body>
 
 <!-- ================= TOP NAV ================= -->
-<!-- <div class="top-nav">
-  <button id="nav-pos" onclick="navigateTo('pos')">POS</button>
-  <button id="nav-bookings" onclick="navigateTo('bookings')">Bookings</button>
-  <button id="nav-orders" onclick="navigateTo('orders')">Orders</button>
-  <button id="nav-expenses" onclick="navigateTo('expenses')">Expenses</button>
-</div> -->
-
 <div class="app-layout">
-
   <!-- Sidebar -->
   <div id="sidebar" class="sidebar">
     <div class="sidebar-header">
@@ -37,39 +29,45 @@
     </div>
 
     <nav class="sidebar-nav">
-  <button id="nav-pos" onclick="navigateTo('pos')">
-    <span class="material-symbols-outlined icon">point_of_sale</span>
-    <span class="label">POS</span>
-  </button>
+      <button id="nav-pos" onclick="navigateTo('pos')">
+        <span class="material-symbols-outlined icon">point_of_sale</span>
+        <span class="label">POS</span>
+      </button>
 
-  <button id="nav-bookings" onclick="navigateTo('bookings')">
-    <span class="material-symbols-outlined icon">event</span>
-    <span class="label">Bookings</span>
-  </button>
+      <button id="nav-bookings" onclick="navigateTo('bookings')">
+        <span class="material-symbols-outlined icon">event</span>
+        <span class="label">Bookings</span>
+      </button>
 
-  <button id="nav-orders" onclick="navigateTo('orders')">
-    <span class="material-symbols-outlined icon">receipt_long</span>
-    <span class="label">Orders</span>
-  </button>
+      <button id="nav-orders" onclick="navigateTo('orders')">
+        <span class="material-symbols-outlined icon">receipt_long</span>
+        <span class="label">Orders</span>
+      </button>
 
-  <button id="nav-expenses" onclick="navigateTo('expenses')">
-    <span class="material-symbols-outlined icon">payments</span>
-    <span class="label">Expenses</span>
-  </button>
+      <button id="nav-expenses" onclick="navigateTo('expenses')">
+        <span class="material-symbols-outlined icon">payments</span>
+        <span class="label">Expenses</span>
+      </button>
 
-  <button onclick="navigateTo('items')" id="nav-items">
-  📊 Items Stats
-</button>
+      <button onclick="navigateTo('items')" id="nav-items">
+        📊 Items Stats
+      </button>
 
-  <button id="nav-settings" onclick="navigateTo('settings')">
-  <span class="material-symbols-outlined icon">
-    settings
-  </span>
-  <span class="label">Settings</span>
-</button>
+      <button id="nav-attendance" onclick="navigateTo('attendance')">
+        <span class="material-symbols-outlined icon">
+          badge
+        </span>
+        <span class="label">Attendance</span>
+      </button>
 
-</nav>
-
+      <button id="nav-settings" onclick="navigateTo('settings')">
+        <span class="material-symbols-outlined icon">
+          settings
+        </span>
+        <span class="label">Settings</span>
+      </button>
+    </nav>
+    <button onclick="logout()">Logout</button>
   </div>
 
   <!-- Main Content -->
@@ -127,6 +125,7 @@
 
 <script src="js/config.js"></script>
 <script src="js/store.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/app.js"></script>
 
 <script src="js/utils/queryManager.js"></script>
@@ -135,9 +134,8 @@
 <!-- ================= HIDDEN FORMS ================= -->
 
 <form id="hiddenForm" method="POST" target="hiddenFrame" action="">
-
-  <input type="hidden" name="apiKey" value="MadhavStreetSecret">
   <!-- edit support -->
+   <input type="hidden" name="token" id="f_token">
   <input type="hidden" name="billNo" id="f_billNo">
 
   <input type="hidden" name="orderDate" id="f_orderDate">
@@ -159,13 +157,13 @@
 </form>
 
 <form id="bookingForm" method="POST" target="hiddenFrame" action="">
-  <input type="hidden" name="apiKey" value="MadhavStreetSecret">
+  <input type="hidden" name="token" id="f_token">
   <input type="hidden" name="mode" value="booking">
 </form>
 
 <form id="expenseForm" method="POST" target="hiddenFrame" action="">
-<input type="hidden" name="apiKey" value="MadhavStreetSecret">
-
+  <input type="hidden" name="token" id="f_token_expense">
+  <input type="hidden" name="token" id="f_token">
   <input type="hidden" name="mode" value="expense">
   <input type="hidden" name="expenseDate" id="f_e_date">
   <input type="hidden" name="category" id="f_e_category">
@@ -177,6 +175,23 @@
   <input type="hidden" name="expenseMode" id="f_e_mode">
   <input type="hidden" name="vendor" id="f_e_vendor">
   <input type="hidden" name="comment" id="f_e_comment">
+</form>
+
+<form id="attendanceForm"
+      method="POST"
+      target="hiddenFrame"
+      action="">
+
+  <input type="hidden" name="mode" value="attendance">
+  <input type="hidden" name="token" id="f_token">
+
+  <input type="hidden" name="date" id="f_a_date">
+  <input type="hidden" name="staff" id="f_a_staff">
+  <input type="hidden" name="checkIn" id="f_a_checkIn">
+  <input type="hidden" name="checkOut" id="f_a_checkOut">
+  <input type="hidden" name="status" id="f_a_status">
+  <input type="hidden" name="notes" id="f_a_notes">
+
 </form>
  </div> <!-- main-content -->
 </div> <!-- app-layout -->
