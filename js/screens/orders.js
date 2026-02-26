@@ -180,74 +180,95 @@ if (dashboardPeriod === "month") {
   renderPartnerStats(filtered);
 }
 
-
-
-
 function editOrder(billNo) {
-  const order = orderData.find(o => o.billNo === billNo);
+
+  const order =
+    (APP_STORE.orderData || [])
+      .find(o => o.billNo === billNo);
 
   if (!order) {
     alert("Order not found");
     return;
   }
 
-  // Switch to POS
+  // store globally so POS can access
+  window.EDIT_ORDER = order;
+
+  // switch screen
   navigateTo("pos");
 
-  // Tell POS we are editing
-  editingBillNo = billNo;
+  // wait until POS DOM loads
+  setTimeout(() => {
 
-  // Show bill number in header
-  const billEl = document.getElementById("billNumber");
-  if (billEl) billEl.innerText = billNo;
+    // tell POS we are editing
+    editingBillNo = billNo;
 
-  // Set customer
-  document.getElementById("customerName").value = order.name || "";
+    // show bill number
+    const billEl =
+      document.getElementById("billNumber");
 
-  // Set phone
-  const phoneEl = document.getElementById("phone");
-  if (phoneEl) phoneEl.value = order.phone || "";
+    if (billEl) billEl.innerText = billNo;
 
-  // Set received by
-if (order.receivedBy) {
-  const receiverRadio = document.querySelector(
-    `input[name="receivedBy"][value="${order.receivedBy}"]`
-  );
-  if (receiverRadio) {
-    receiverRadio.checked = true;
-  }
-}
+    // customer name
+    const nameEl =
+      document.getElementById("customerName");
 
+    if (nameEl)
+      nameEl.value = order.name || "";
 
-  // Set date
-  if (order.date) {
-    document.getElementById("orderDate").value = order.date;
-  }
+    // phone
+    const phoneEl =
+      document.getElementById("phone");
 
-  if (order.discount) {
-      document.getElementById("discount").value = order.discount || "";
-  }
+    if (phoneEl)
+      phoneEl.value = order.phone || "";
 
+    // date
+    const dateEl =
+      document.getElementById("orderDate");
 
-  // Clear memory
-  tableOrders = {};
+    if (dateEl && order.date)
+      dateEl.value = order.date;
 
-  // Parse items
-  let parsedItems = {};
-  try {
-    if (order.itemsJSON && order.itemsJSON.startsWith("{")) {
-      parsedItems = JSON.parse(order.itemsJSON);
+    // discount
+    const discEl =
+      document.getElementById("discount");
+
+    if (discEl)
+      discEl.value = order.discount || "";
+
+    // received by
+    if (order.receivedBy) {
+      const receiverRadio = document.querySelector(
+        `input[name="receivedBy"][value="${order.receivedBy}"]`
+      );
+      if (receiverRadio)
+        receiverRadio.checked = true;
     }
-  } catch (e) {
-    console.error("Item parse error:", e);
-  }
 
-  // Use dedicated edit table
-  currentTable = "EDIT_ORDER";
-  tableOrders[currentTable] = parsedItems;
+    // clear table memory
+    tableOrders = {};
 
-  // Render bill
-  renderBill();
+    // parse items safely
+    let parsedItems = {};
+
+    try {
+      if (order.itemsJSON &&
+          order.itemsJSON.startsWith("{")) {
+        parsedItems =
+          JSON.parse(order.itemsJSON);
+      }
+    } catch (e) {
+      console.error("Item parse error:", e);
+    }
+
+    currentTable = "EDIT_ORDER";
+    tableOrders[currentTable] = parsedItems;
+
+    renderBill();
+
+  }, 150); // IMPORTANT delay
+
 }
 
 function renderFilteredSummary(list) {

@@ -311,9 +311,6 @@ function toggleSidebar(){
 
 function setFormActions() {
 
-  const token =
-    sessionStorage.getItem("ms_token");
-
   const forms = [
     "hiddenForm",
     "bookingForm",
@@ -324,16 +321,26 @@ function setFormActions() {
   forms.forEach(id => {
 
     const form = document.getElementById(id);
-
     if (!form) return;
 
-    form.action = scriptURL;
+    form.action = CONFIG.scriptURL;
 
-    const tokenInput =
-      form.querySelector("[name='token']");
-
-    if (tokenInput) {
-      tokenInput.value = token;
-    }
+    // 🔥 ADD SECURITY FIELDS
+    addHidden(form,"apiKey","MadhavStreetSecret");
+    addHidden(form,"token",sessionStorage.getItem("ms_token") || "");
   });
+}
+
+function addHidden(form,name,value){
+
+  let input = form.querySelector(`[name="${name}"]`);
+
+  if(!input){
+    input=document.createElement("input");
+    input.type="hidden";
+    input.name=name;
+    form.appendChild(input);
+  }
+
+  input.value=value;
 }
