@@ -38,3 +38,104 @@
   color:red;
   font-size:13px;
 }
+
+/* Password field with toggle */
+.password-field {
+  position: relative;
+}
+
+.password-field .toggle-password {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .login-card {
+    width: 92%;
+    padding: 18px;
+  }
+  .login-card h2 {
+    font-size: 20px;
+  }
+}
+
+/* Toggle icon layering + animation */
+.toggle-password { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; }
+.toggle-password .icon { position: relative; display: inline-block; transition: opacity 180ms ease, transform 180ms ease; }
+.toggle-password .icon-eye { opacity: 1; transform: scale(1); }
+.toggle-password .icon-eye-off { opacity: 0; transform: scale(0.9); }
+.password-field.showing .toggle-password .icon-eye { opacity: 0; transform: scale(0.9); }
+.password-field.showing .toggle-password .icon-eye-off { opacity: 1; transform: scale(1); }
+
+.remember-row { text-align: left; margin-top: 8px; }
+.remember input { margin-right: 8px; }
+
+/* ===== PASSWORD FIELD ===== */
+
+.password-field input {
+  margin-top: 12px;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  top: 58%;
+}
+
+/* ===== REMEMBER ME FIX ===== */
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.remember input {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+/* ===== LOGIN BUTTON ONLY ===== */
+
+.login-card button[type="submit"] {
+  margin-top: 16px;
+}
+
+/* ===== REMOVE GLOBAL BUTTON STYLE ISSUE ===== */
+
+.login-card button {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+
+  .login-card {
+    width: 92%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+
+  .login-card h2 {
+    font-size: 20px;
+  }
+
+  .login-card button {
+    width: 100%;
+  }
+
+}

@@ -18,3 +18,15 @@
   color:white;
   padding:10px;
 }
+
+/* Tabs */
+.settings-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
+.settings-tab{ padding:8px 12px; border-radius:8px; cursor:pointer; background:#f3f3f3; border:1px solid #eee }
+.settings-tab.active{ background: #ff6a00; color:#fff; border-color:transparent }
+
+.module-card{ padding:12px }
+.module-actions{ display:flex; gap:8px; align-items:center; margin-bottom:8px }
+.setting-input{ padding:8px; border-radius:6px; border:1px solid #ddd; }
+.settings-list { width:100%; border-collapse:collapse }
+.settings-list td{ padding:8px; border-bottom:1px solid #f1f1f1 }
+.settings-list .small-btn{ padding:6px 8px; border-radius:6px; font-size:13px }

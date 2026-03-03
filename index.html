@@ -49,6 +49,13 @@
         <span class="label">Expenses</span>
       </button>
 
+      <button id="nav-inventory" onclick="navigateTo('inventory')">
+        <span class="material-symbols-outlined icon">
+          inventory_2
+        </span>
+        <span class="label">Inventory</span>
+      </button>
+
       <button onclick="navigateTo('items')" id="nav-items">
         📊 Items Stats
       </button>
@@ -68,6 +75,8 @@
       </button>
     </nav>
     <button onclick="logout()">Logout</button>
+
+    <div id="appVersion" class="app-version"></div>
   </div>
 
   <!-- Main Content -->
@@ -123,6 +132,10 @@
 
 <iframe name="hiddenFrame" style="display:none;"></iframe>
 
+<script src="js/api.js"></script>
+<script src="js/utils/utils.js"></script>
+
+<script src="js/version.js"></script>
 <script src="js/config.js"></script>
 <script src="js/store.js"></script>
 <script src="js/auth.js"></script>

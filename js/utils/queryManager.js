@@ -54,3 +54,13 @@ function setRouteParams(route, data) {
 
   window.history.replaceState(null, "", newHash);
 }
+
+// Ensure a safe fallback for `window.getTodayLocal` without creating
+// a global function that could overwrite the utility's implementation.
+if (typeof window.getTodayLocal !== "function") {
+  window.getTodayLocal = function () {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().split("T")[0];
+  };
+}

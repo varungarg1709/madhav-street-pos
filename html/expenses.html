@@ -41,6 +41,27 @@
     </div>
 
     <div class="filter-group">
+      <label>Category</label>
+      <select id="expensesCategoryFilter" onchange="applyExpenseFilters()">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Type</label>
+      <select id="expensesTypeFilter" onchange="applyExpenseFilters()">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Staff</label>
+      <select id="expensesStaffFilter" onchange="applyExpenseFilters()">
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
       <label>Status</label>
       <select id="expensesPendingFilter"
               onchange="applyExpenseFilters()">

@@ -9,7 +9,9 @@ const screenLifecycle = {
   orders:false,
   expenses:false,
   items:false,
-  settings:false
+  settings:false,
+  attendance:false,
+  inventory:false   // ✅ ADD THIS
 };
 
 const loadedAssets = {
@@ -58,6 +60,12 @@ const screenAssets = {
     init:"initItemsStats"
   },
 
+  inventory:{
+    css:["css/inventory.css"],
+    js:["js/inventory.js"],   // since you're loading directly
+    init:"initInventory"
+  },
+
   settings:{
     css:["css/settings.css"],
     js:["js/screens/settings.js"],
@@ -68,7 +76,7 @@ const screenAssets = {
     css:["css/attendance.css"],
     js:["js/screens/attendance.js"],
     init:"initAttendance"
-  }
+  }  
 };
 
 /* ================= LOADERS ================= */
@@ -152,6 +160,7 @@ window.onload = async function(){
 
     appLayout.style.display = "none";
 
+    loadCSS("css/skeleton.css");
     loadCSS("css/login.css");
 
     const res = await fetch("html/login.html");
@@ -171,8 +180,10 @@ window.onload = async function(){
 };
 
 async function startApp() {
+  updateFormTokens();
 
   await loadInitialData();
+  setFormActions();
 
   // force default screen
   if (!location.hash) {
@@ -181,6 +192,37 @@ async function startApp() {
     handleRoute();
   }
 }
+
+// Apply role-based visibility for sidebar items
+function applyRolePermissions(){
+  const role = sessionStorage.getItem("ms_role") || localStorage.getItem("ms_role") || "guest";
+
+  const perms = {
+    pos: ['admin','manager','chef','waiter','staff'],
+    bookings: ['admin','manager'],
+    orders: ['admin','manager','chef','waiter'],
+    expenses: ['admin','manager'],
+    inventory: ['admin','manager'],  // ✅ ADD THIS
+    items: ['admin','manager'],
+    attendance: ['admin','manager','staff'],
+    settings: ['admin']
+  };
+
+  Object.keys(perms).forEach(screen => {
+    const allowed = perms[screen];
+    const btn = document.getElementById('nav-' + screen);
+    if (!btn) return;
+    if (!allowed.includes(role)) btn.style.display = 'none';
+    else btn.style.display = '';
+  });
+}
+
+// run permissions after app starts and whenever reloadData completes
+const originalStartApp = startApp;
+startApp = async function(){
+  await originalStartApp();
+  applyRolePermissions();
+};
 
 function navigateTo(screen){
   location.hash="/"+screen;
@@ -213,6 +255,9 @@ async function showScreen(screen){
 
   // load html first
   await loadScreenHTML(screen);
+  // ensure forms inside screen get latest token
+  updateFormTokens();
+  setFormActions();
 
   // load css/js
   assets.css?.forEach(loadCSS);
@@ -252,14 +297,16 @@ async function showScreen(screen){
 /* ================= DATA LOADING ================= */
 
 async function loadInitialData(){
-
   try{
 
-    const res=await fetch(scriptURL);
+    const token = getAuthToken();
+
+    const res = await fetch(
+      `${scriptURL}?token=${token}&apiKey=MadhavStreetSecret`
+    );
     const data=await res.json();
 
     Object.assign(APP_STORE,{
-
       menuData:data.menu||[],
       staffData:data.staffNames||[],
       tableData:data.tables||[],
@@ -279,7 +326,8 @@ async function loadInitialData(){
       expenseModes:data.expenseModes||[],
       vendors:data.vendors||[],
       expenseData:data.expenses||[],
-      attendanceData: data.attendance || []
+      attendanceData: data.attendance || [],
+      inventoryData: data.inventory || [],
     });
 
     APP_STORE.loaded=true;
@@ -305,8 +353,13 @@ function reloadData(callback){
 /* ================= UI ================= */
 
 function toggleSidebar(){
-  document.getElementById("sidebar")
-    .classList.toggle("collapsed");
+  const sidebar = document.getElementById("sidebar");
+
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle("mobile-open");
+  } else {
+    sidebar.classList.toggle("collapsed");
+  }
 }
 
 function setFormActions() {
@@ -327,7 +380,7 @@ function setFormActions() {
 
     // 🔥 ADD SECURITY FIELDS
     addHidden(form,"apiKey","MadhavStreetSecret");
-    addHidden(form,"token",sessionStorage.getItem("ms_token") || "");
+    addHidden(form,"token", getAuthToken());
   });
 }
 
@@ -343,4 +396,53 @@ function addHidden(form,name,value){
   }
 
   input.value=value;
+}
+
+function renderAppVersion() {
+  const el = document.getElementById("appVersion");
+  if (el) {
+    el.innerText = "Version " + APP_VERSION;
+  }
+}
+
+function getAuthToken() {
+  return (
+    sessionStorage.getItem("ms_token") ||
+    localStorage.getItem("ms_token") ||
+    ""
+  );
+}
+
+function showSkeleton(screen, html) {
+  const el = document.getElementById(screen + "Screen");
+  if (!el) return;
+
+  el.innerHTML = html;
+}
+
+function hideSkeleton(screen) {
+  // real screen init will overwrite automatically
+}
+
+function updateFormTokens(){
+
+  const token =
+    sessionStorage.getItem("ms_token") ||
+    localStorage.getItem("ms_token") ||
+    "";
+
+  const forms = [
+    "hiddenForm",
+    "bookingForm",
+    "expenseForm",
+    "attendanceForm"
+  ];
+
+  forms.forEach(id => {
+    const form = document.getElementById(id);
+    if (!form) return;
+
+    addHidden(form,"apiKey","MadhavStreetSecret");
+    addHidden(form,"token",token);
+  });
 }

@@ -2,6 +2,7 @@ let categories = [];
 let tableOrders = {};
 let currentTable = "GENERAL";
 let editingBillNo = null; // for future edit support
+let editOrderKey = null;
 
 function initPOS() {
   if (!APP_STORE.loaded) {
@@ -10,10 +11,158 @@ function initPOS() {
   }
   setupPOS();
   populateOrderDetails();
+  loadEditOrderIfAny();
+
+  // Notify that POS screen finished initial rendering and is ready
+  try {
+    window.dispatchEvent(new CustomEvent('screen-ready', { detail: { screen: 'pos' } }));
+  } catch (e) {}
+}
+
+function loadEditOrderIfAny() {
+  const order = window.EDIT_ORDER;
+  if (!order) return;
+
+  editOrderKey = order.table || "GENERAL";
+  currentTable = editOrderKey;
+
+  editingBillNo = order.billNo;
+
+  document.getElementById("billNumber").innerText =
+    order.billNo || "";
+
+  document.getElementById("customerName").value =
+    order.name || "";
+
+  document.getElementById("phone").value =
+    order.phone || "";
+
+  document.getElementById("orderDate").value =
+    order.date || getTodayLocal();
+
+  // tables (multi select support)
+  const tableEl = document.getElementById("tableNo");
+  if (tableEl && order.table) {
+    const tables = order.table.split(",").map(t => t.trim());
+    Array.from(tableEl.options).forEach(opt => {
+      opt.selected = tables.includes(opt.value);
+    });
+  }
+
+  // order type
+  if (order.orderType) {
+    const typeRadio = document.querySelector(
+      `input[name="orderType"][value="${order.orderType}"]`
+    );
+    if (typeRadio) typeRadio.checked = true;
+  }
+
+  // load items
+  tableOrders = {};
+  let parsedItems = {};
+
+  try {
+    parsedItems = JSON.parse(order.itemsJSON || "{}");
+  } catch {}
+
+  tableOrders[currentTable] = parsedItems;
+
+  renderBill();
+
+  // restore async fields
+  requestAnimationFrame(() => {
+
+    function setSelectValue(selectEl, value) {
+      if (!selectEl) return;
+      const v = value || "";
+
+      // try exact match first
+      let opt = Array.from(selectEl.options).find(o => o.value === v);
+      if (!opt) {
+        // try case-insensitive match on value or text
+        opt = Array.from(selectEl.options).find(o => (o.value||"").toLowerCase() === (v||"").toLowerCase() || (o.text||"").toLowerCase() === (v||"").toLowerCase());
+      }
+
+      if (opt) {
+        selectEl.value = opt.value;
+      } else {
+        // if value is non-empty and option not found, append a custom option so it can be selected
+        if (v) {
+          const newOpt = document.createElement('option');
+          newOpt.value = v;
+          newOpt.textContent = v;
+          selectEl.appendChild(newOpt);
+          selectEl.value = v;
+        } else {
+          selectEl.value = "";
+        }
+      }
+    }
+
+    // populate order source with common alternate keys and simple inference
+    const sourceVal = order.orderSource || order.order_source || order.source || "";
+    // if still empty, infer Dine-in when table list looks like multiple tables
+    let inferredSource = sourceVal;
+    if (!inferredSource && order.table) {
+      const t = String(order.table);
+      if (t.includes(",") || /T\d+/i.test(t)) inferredSource = "Dine-in";
+    }
+    setSelectValue(document.getElementById("orderSource"), inferredSource);
+
+    document.getElementById("discount").value = order.discount || "";
+
+    // total members: accept common keys or infer from parsed items
+    const membersEl = document.getElementById("totalMembers");
+    if (membersEl) {
+      let m = order.totalMembers || order.total_members || order.members || "";
+      if (!m) {
+        // infer from item quantities
+        try {
+          let sum = 0;
+          Object.values(parsedItems || {}).forEach(raw => {
+            if (raw == null) return;
+            if (typeof raw === 'number') sum += Number(raw) || 0;
+            else if (typeof raw === 'object') sum += Number(raw.qty || raw.quantity || 0) || 0;
+          });
+          if (sum) m = String(sum);
+        } catch (e) {}
+      }
+      membersEl.value = m || "";
+    }
+
+    document.getElementById("feedback").value = order.feedback || "";
+
+    setSelectValue(document.getElementById("eventType"), order.eventType || order.event_type || order.event || "");
+
+    setSelectValue(document.getElementById("deliveredBy"), order.deliveredBy || order.receivedBy || "");
+
+    // payment JSON
+    let payment = {};
+    try {
+      payment = JSON.parse(order.paymentMode || "{}");
+    } catch {}
+
+    document.getElementById("cashAmount").value =
+      payment.cash || "";
+
+    document.getElementById("upiAmount").value =
+      payment.upi || "";
+
+    document.getElementById("cardAmount").value =
+      payment.card || "";
+
+    renderBill();
+    updatePaymentStatus();
+  });
+
+  const saveBtn = document.getElementById("saveBillBtn");
+  if (saveBtn) saveBtn.innerText = "UPDATE ORDER";
+
+  window.EDIT_ORDER = null;
 }
 
 function setupPOS() {
-  let today = new Date().toISOString().split("T")[0];
+  let today = getTodayLocal();
   document.getElementById("orderDate").value = today;
 
   // Tables
@@ -83,32 +232,31 @@ function createMenuItemButton(item) {
   const btn = document.createElement("div");
   btn.className = "menu-item";
 
-  let name = item.item.toLowerCase();
+  let name = (item.item || "").toLowerCase();
 
   // Default class
   let colorClass = "menu-regular";
 
-  if (name.includes("half")) {
-    colorClass = "menu-half";
-  }
-  if (name.includes("full")) {
-    colorClass = "menu-full";
-  }
-  if (name.includes("white base")) {
-    colorClass = "menu-white";
-  }
-  if (name.includes("brown base") || name.includes("wheat")) {
-    colorClass = "menu-brown";
-  }
+  if (name.includes("half")) colorClass = "menu-half";
+  if (name.includes("full")) colorClass = "menu-full";
+  if (name.includes("white base")) colorClass = "menu-white";
+  if (name.includes("brown base") || name.includes("wheat")) colorClass = "menu-brown";
 
   btn.classList.add(colorClass);
 
-  btn.innerHTML = `
-    <div class="item-name">${item.item}</div>
-    <div class="item-price">₹${item.price}</div>
-  `;
+  const nameDiv = document.createElement("div");
+  nameDiv.className = "item-name";
+  nameDiv.textContent = item.item || "";
 
-  btn.onclick = () => addItem(item);
+  const priceDiv = document.createElement("div");
+  priceDiv.className = "item-price";
+  priceDiv.textContent = "₹" + (item.price || "");
+
+  btn.appendChild(nameDiv);
+  btn.appendChild(priceDiv);
+
+  btn.addEventListener("click", () => addItem(item));
+
   return btn;
 }
 
@@ -150,8 +298,8 @@ function filterMenu() {
 
 function getSelectedTable() {
   // If editing, always use edit table
-  if (currentTable === "EDIT_ORDER") {
-    return "EDIT_ORDER";
+  if (editingBillNo && editOrderKey) {
+    return editOrderKey;
   }
 
   const typeEl = document.querySelector(
@@ -264,24 +412,50 @@ function renderBill() {
 
     const line = document.createElement("div");
     line.className = "bill-line";
-    line.innerHTML = `
-      <div class="bill-item-name">${item}</div>
 
-      <div class="qty-controls">
-        <button class="qty-btn" onclick="changeQty('${item}', -1)">−</button>
-        <input 
-          class="qty-input" 
-          type="number" 
-          min="1"
-          value="${order[item].qty}" 
-          onchange="setQty('${item}', this.value)">
-        <button class="qty-btn" onclick="changeQty('${item}', 1)">+</button>
-      </div>
+    const nameDiv = document.createElement("div");
+    nameDiv.className = "bill-item-name";
+    nameDiv.textContent = item;
 
-      <div class="bill-item-total">₹${lineTotal}</div>
+    const qtyControls = document.createElement("div");
+    qtyControls.className = "qty-controls";
 
-      <button class="remove-btn" onclick="removeItem('${item}')">✖</button>
-    `;
+    const minusBtn = document.createElement("button");
+    minusBtn.className = "qty-btn";
+    minusBtn.textContent = "−";
+    minusBtn.addEventListener("click", () => changeQty(item, -1));
+
+    const qtyInput = document.createElement("input");
+    qtyInput.className = "qty-input";
+    qtyInput.type = "number";
+    qtyInput.min = 1;
+    qtyInput.value = order[item].qty;
+    qtyInput.addEventListener("change", function () {
+      setQty(item, this.value);
+    });
+
+    const plusBtn = document.createElement("button");
+    plusBtn.className = "qty-btn";
+    plusBtn.textContent = "+";
+    plusBtn.addEventListener("click", () => changeQty(item, 1));
+
+    qtyControls.appendChild(minusBtn);
+    qtyControls.appendChild(qtyInput);
+    qtyControls.appendChild(plusBtn);
+
+    const totalDiv = document.createElement("div");
+    totalDiv.className = "bill-item-total";
+    totalDiv.textContent = "₹" + lineTotal;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "remove-btn";
+    removeBtn.textContent = "✖";
+    removeBtn.addEventListener("click", () => removeItem(item));
+
+    line.appendChild(nameDiv);
+    line.appendChild(qtyControls);
+    line.appendChild(totalDiv);
+    line.appendChild(removeBtn);
 
     container.appendChild(line);
   }
@@ -308,7 +482,10 @@ if (mobileTotal) {
 }
 
 function clearBill() {
-  currentTable = getSelectedTable();
+
+  if (!editingBillNo) {
+    currentTable = getSelectedTable();
+  }
   delete tableOrders[currentTable];
 
   document.getElementById("billItems").innerHTML =
@@ -316,6 +493,7 @@ function clearBill() {
 
   document.getElementById("subtotal").innerText = "0";
   document.getElementById("total").innerText = "0";
+
   document.getElementById("discount").value = "";
 
   document.getElementById("cashAmount").value = "";
@@ -329,9 +507,28 @@ function clearBill() {
   document.getElementById("phone").value = "";
   document.getElementById("feedback").value = "";
 
-  document.getElementById("billNumber").innerText = "MS/--/----/---";
-  editingBillNo = null;
+  const membersEl = document.getElementById("totalMembers");
+  if (membersEl) membersEl.value = "";
 
+  const sourceEl = document.getElementById("orderSource");
+  if (sourceEl) sourceEl.selectedIndex = 0;
+
+  const eventEl = document.getElementById("eventType");
+  if (eventEl) eventEl.selectedIndex = 0;
+
+  const deliveredEl = document.getElementById("deliveredBy");
+  if (deliveredEl) deliveredEl.selectedIndex = 0;
+
+  document.getElementById("billNumber").innerText =
+    "MS/--/----/---";
+
+  // reset edit mode
+  editingBillNo = null;
+  currentTable = "GENERAL";
+
+  // reset save button text
+  const saveBtn = document.getElementById("saveBillBtn");
+  if (saveBtn) saveBtn.innerText = "SAVE BILL";
 }
 
 
@@ -445,10 +642,11 @@ function saveBill() {
   let upi = parseFloat(document.getElementById("upiAmount").value) || 0;
   let card = parseFloat(document.getElementById("cardAmount").value) || 0;
 
-  let paymentMode = [];
-  if (cash > 0) paymentMode.push("Cash");
-  if (upi > 0) paymentMode.push("UPI");
-  if (card > 0) paymentMode.push("Card");
+  const paymentJSON = JSON.stringify({
+    cash,
+    upi,
+    card
+  });
 
   // Helper to safely set hidden fields
   function setHidden(id, value) {
@@ -474,7 +672,7 @@ function saveBill() {
   setHidden("f_amount", document.getElementById("total").innerText);
   setHidden("f_discount", document.getElementById("discount").value);
 
-  setHidden("f_paymentMode", paymentMode.join(", "));
+  setHidden("f_paymentMode", paymentJSON);
   setHidden(
     "f_paymentStatus",
     document.getElementById("paymentStatus").innerText
@@ -680,3 +878,6 @@ function autoFillCustomerFromPhone() {
     nameInput.value = match.name;
   }
 }
+
+// expose helper so other screens can request POS to load an edit order
+window.loadEditOrderIfAny = loadEditOrderIfAny;

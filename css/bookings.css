@@ -11,3 +11,59 @@
   padding:20px;
   border-radius:12px;
 }
+
+/* Two-column responsive layout */
+.booking-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.booking-form .row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.booking-form input[type="text"],
+.booking-form input[type="date"],
+.booking-form input[type="time"],
+.booking-form input[type="number"],
+.booking-form select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  flex: 1 1 auto;
+}
+
+.booking-form button {
+  padding: 8px 12px;
+  border: none;
+  background: #1976d2;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.booking-actions button {
+  margin-left: 6px;
+}
+
+.booking-row {
+  display:flex;
+  justify-content:space-between;
+  padding:10px 8px;
+  border-bottom:1px solid #f0f0f0;
+}
+
+@media (max-width: 800px) {
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+  .booking-form .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
