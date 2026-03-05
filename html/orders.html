@@ -2,20 +2,20 @@
 <!-- ================= ORDERS SCREEN ================= -->
 
 <div id="ordersScreen" class="screen">
-  <div class="page-header">
+  <div class="orders-header">
   <h2>Order Dashboard</h2>
-</div>
 
-<div class="period-toggle">
-  <button id="periodToday" class="active"
-          onclick="setDashboardPeriod('today')">
-    TODAY
-  </button>
+  <div class="period-toggle">
+    <button id="periodToday" class="active"
+            onclick="setDashboardPeriod('today')">
+      TODAY
+    </button>
 
-  <button id="periodMonth"
-          onclick="setDashboardPeriod('month')">
-    THIS MONTH
-  </button>
+    <button id="periodMonth"
+            onclick="setDashboardPeriod('month')">
+      THIS MONTH
+    </button>
+  </div>
 </div>
 
 <div id="salesSummary"></div>
@@ -25,10 +25,10 @@
   <!-- Filters -->
   <div class="orders-filters">
   <label>From</label>
-  <input type="date" id="ordersFromDate" onchange="applyOrderFilters()">
+  <input type="date" id="ordersFromDate" onchange="onDateChange()">
 
   <label>To</label>
-  <input type="date" id="ordersToDate" onchange="applyOrderFilters()">
+  <input type="date" id="ordersToDate" onchange="onDateChange()">
 
   <input
     type="text"
@@ -68,6 +68,7 @@
           <th>Bill No</th>
           <th>Date</th>
           <th>Customer</th>
+          <th>Items</th>
           <th>Phone</th>
           <th>Table</th>
           <th>Amount</th>

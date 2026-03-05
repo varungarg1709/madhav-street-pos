@@ -7,14 +7,17 @@ function initExpenses() {
   }
 
   const params = getRouteParams("expenses");
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayLocal();
 
   expensesState = {
   from: params.expenses_from || today,
   to: params.expenses_to || today,
   partner: params.expenses_partner || "",
   pending: params.expenses_pending || "",
-  sort: params.expenses_sort || "date_desc"
+  sort: params.expenses_sort || "date_desc",
+  category: params.expenses_category || "",
+  type: params.expenses_type || "",
+  staff: params.expenses_staff || ""
 };
 
   const dateInput = document.getElementById("e_date");
@@ -24,6 +27,9 @@ function initExpenses() {
   const partner = document.getElementById("expensesPartnerFilter");
   const pending = document.getElementById("expensesPendingFilter");
   const sort = document.getElementById("expensesSort");
+  const catFilter = document.getElementById("expensesCategoryFilter");
+  const typeFilter = document.getElementById("expensesTypeFilter");
+  const staffFilter = document.getElementById("expensesStaffFilter");
 
   if (dateInput) dateInput.value = today;
 
@@ -41,6 +47,10 @@ function initExpenses() {
 
   if (sort)
     sort.value = expensesState.sort;
+
+  if (catFilter) catFilter.value = expensesState.category;
+  if (typeFilter) typeFilter.value = expensesState.type;
+  if (staffFilter) staffFilter.value = expensesState.staff;
 
   populateExpenseDropdowns();
   applyExpenseFilters();
@@ -73,6 +83,11 @@ function populateExpenseDropdowns() {
   fillSelect("e_staff", APP_STORE.staffData, "Staff name");
   fillSelect("e_mode", APP_STORE.expenseModes, "Expense Mode");
   fillSelect("e_vendor", APP_STORE.vendors, "Purchased from");
+
+  // populate filter selects as well
+  fillSelect("expensesCategoryFilter", APP_STORE.expenseCategories, "All");
+  fillSelect("expensesTypeFilter", APP_STORE.expenseTypes, "All");
+  fillSelect("expensesStaffFilter", APP_STORE.staffData, "All");
 }
 
 function getSelectedExpenseTypes() {
@@ -150,6 +165,15 @@ function applyExpenseFilters() {
   const partner =
     document.getElementById("expensesPartnerFilter")?.value;
 
+  const category =
+    document.getElementById("expensesCategoryFilter")?.value;
+
+  const typeFilterVal =
+    document.getElementById("expensesTypeFilter")?.value;
+
+  const staffFilterVal =
+    document.getElementById("expensesStaffFilter")?.value;
+
   const pendingFilter =
     document.getElementById("expensesPendingFilter")?.value;
 
@@ -172,6 +196,21 @@ function applyExpenseFilters() {
   // Partner filter
   if (partner) {
     filtered = filtered.filter(e => e.partner === partner);
+  }
+
+  // Category filter
+  if (category) {
+    filtered = filtered.filter(e => (e.category || '') === category);
+  }
+
+  // Type filter
+  if (typeFilterVal) {
+    filtered = filtered.filter(e => (e.type || '') === typeFilterVal || (String(e.type||'')).split(',').map(s=>s.trim()).includes(typeFilterVal));
+  }
+
+  // Staff filter
+  if (staffFilterVal) {
+    filtered = filtered.filter(e => (e.staff || '') === staffFilterVal);
   }
 
   // Pending filter
@@ -212,6 +251,10 @@ function applyExpenseFilters() {
     expenses_partner: partner,
     expenses_pending: pendingFilter,
     expenses_sort: sort
+    ,
+    expenses_category: category,
+    expenses_type: typeFilterVal,
+    expenses_staff: staffFilterVal
     });
 
 
@@ -274,7 +317,27 @@ function renderExpenseSummary(list) {
     else counter += amt;
   });
 
-  container.innerHTML = `
+  // Aggregations by category and staff
+  const catTotals = {};
+  const staffTotals = {};
+
+  list.forEach(e => {
+    const amt = Number(e.amount) || 0;
+    const cat = e.category || 'Uncategorized';
+    const st = e.staff || 'Unknown';
+
+    catTotals[cat] = (catTotals[cat] || 0) + amt;
+    staffTotals[st] = (staffTotals[st] || 0) + amt;
+  });
+
+  function topList(map, n){
+    return Object.keys(map).map(k=>({k, v: map[k]})).sort((a,b)=>b.v-a.v).slice(0,n);
+  }
+
+  const topCats = topList(catTotals,5);
+  const topStaff = topList(staffTotals,5);
+
+  let html = `
     <div class="summary-card">
       Total
       <span>₹${total}</span>
@@ -287,19 +350,19 @@ function renderExpenseSummary(list) {
       UPI
       <span>₹${upi}</span>
     </div>
-    <div class="summary-card">
-      Varun
-      <span>₹${varun}</span>
-    </div>
-    <div class="summary-card">
-      Amit
-      <span>₹${amit}</span>
-    </div>
-    <div class="summary-card">
-      Counter
-      <span>₹${counter}</span>
-    </div>
   `;
+
+  // top categories
+  html += `<div class="summary-card"><div class="stat-title">Top Categories</div>`;
+  topCats.forEach(it=>{ html += `<div style="margin-top:6px">${it.k} — ₹${it.v}</div>` });
+  html += `</div>`;
+
+  // top staff
+  html += `<div class="summary-card"><div class="stat-title">Top Staff</div>`;
+  topStaff.forEach(it=>{ html += `<div style="margin-top:6px">${it.k} — ₹${it.v}</div>` });
+  html += `</div>`;
+
+  container.innerHTML = html;
 }
 
 
