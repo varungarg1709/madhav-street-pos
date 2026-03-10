@@ -194,3 +194,121 @@
     grid-column: span 1;
   }
 }
+
+/* Expenses table improvements */
+
+#expensesTableBody td{
+  font-size:13px;
+  vertical-align:top;
+}
+
+.amount-col{
+  width:100px;
+  text-align:right;
+  font-weight:600;
+}
+
+.comment-col{
+  max-width:280px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.data-table td{
+  padding:10px 8px;
+}
+
+.expense-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:16px;
+  margin-bottom:20px;
+}
+
+.summary-card{
+  background:#fff;
+  padding:16px;
+  border-radius:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+
+.summary-card span{
+  display:block;
+  font-size:22px;
+  font-weight:600;
+  margin-top:6px;
+}
+
+.expense-filters{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px;
+  align-items:center;
+}
+
+.vendor-col{
+  max-width:200px;
+}
+
+.card{
+  padding:18px;
+  border-radius:12px;
+}
+
+/* expenses table improvements */
+
+#expensesTableBody td{
+  padding:10px 12px;
+  vertical-align:top;
+}
+
+.data-table th{
+  font-weight:600;
+  font-size:13px;
+}
+
+.data-table td{
+  font-size:13px;
+}
+
+/* date column */
+.data-table td:nth-child(2){
+  white-space:nowrap;
+  font-weight:500;
+}
+
+/* amount column */
+.data-table td:nth-child(8){
+  font-weight:600;
+  color:#16a34a;
+}
+
+/* comment column */
+.data-table td:last-child{
+  color:#555;
+  max-width:260px;
+}
+
+.expense-cat{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:500;
+}
+
+.expense-cat.kitchen{
+  background:#fff7ed;
+  color:#ea580c;
+}
+
+.expense-cat.staff{
+  background:#eef2ff;
+  color:#4f46e5;
+}
+
+.filters-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}

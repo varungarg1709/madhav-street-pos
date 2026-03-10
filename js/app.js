@@ -11,7 +11,8 @@ const screenLifecycle = {
   items:false,
   settings:false,
   attendance:false,
-  inventory:false   // ✅ ADD THIS
+  inventory:false,
+  finance: false,
 };
 
 const loadedAssets = {
@@ -42,6 +43,12 @@ const screenAssets = {
     init:"initBookings"
   },
 
+  accessDenied:{
+    css:["css/accessDenied.css"],
+    js:[],
+    init:null
+  },
+
   orders:{
     css:["css/orders.css"],
     js:["js/screens/orders.js"],
@@ -64,6 +71,12 @@ const screenAssets = {
     css:["css/inventory.css"],
     js:["js/inventory.js"],   // since you're loading directly
     init:"initInventory"
+  },
+
+  finance:{
+    css:["css/finance.css"],
+    js:["js/screens/finance.js"],
+    init:"initFinance"
   },
 
   settings:{
@@ -170,6 +183,8 @@ window.onload = async function(){
       await res.text()
     );
 
+    if(window.initLoginUI) initLoginUI();
+
     return;
   }
 
@@ -195,26 +210,31 @@ async function startApp() {
 
 // Apply role-based visibility for sidebar items
 function applyRolePermissions(){
-  const role = sessionStorage.getItem("ms_role") || localStorage.getItem("ms_role") || "guest";
 
-  const perms = {
-    pos: ['admin','manager','chef','waiter','staff'],
-    bookings: ['admin','manager'],
-    orders: ['admin','manager','chef','waiter'],
-    expenses: ['admin','manager'],
-    inventory: ['admin','manager'],  // ✅ ADD THIS
-    items: ['admin','manager'],
-    attendance: ['admin','manager','staff'],
-    settings: ['admin']
-  };
+  const role =
+    sessionStorage.getItem("ms_role") ||
+    localStorage.getItem("ms_role") ||
+    "guest";
+
+  const perms = CONFIG.rolePermissions || {};
 
   Object.keys(perms).forEach(screen => {
-    const allowed = perms[screen];
-    const btn = document.getElementById('nav-' + screen);
-    if (!btn) return;
-    if (!allowed.includes(role)) btn.style.display = 'none';
-    else btn.style.display = '';
+
+    const btn = document.getElementById("nav-" + screen);
+
+    if(!btn) return;
+
+    if(!perms[screen].includes(role)){
+      btn.style.display = "none";
+    } else {
+      btn.style.display = "";
+    }
+
   });
+
+  // reveal sidebar after filtering
+  const sidebar = document.getElementById("sidebar");
+  if(sidebar) sidebar.style.visibility = "visible";
 }
 
 // run permissions after app starts and whenever reloadData completes
@@ -225,7 +245,15 @@ startApp = async function(){
 };
 
 function navigateTo(screen){
-  location.hash="/"+screen;
+
+  const btn = document.getElementById("nav-"+screen)
+
+  if(btn && btn.style.display === "none"){
+    console.warn("Access denied:",screen)
+    return
+  }
+
+  location.hash = "/" + screen
 }
 
 function handleRoute(){
@@ -245,7 +273,28 @@ window.addEventListener("hashchange",handleRoute);
 
 /* ================= MAIN SCREEN LOADER ================= */
 
+function isScreenAllowed(screen){
+
+  const role =
+    sessionStorage.getItem("ms_role") ||
+    localStorage.getItem("ms_role") ||
+    "guest";
+
+  const perms = CONFIG.rolePermissions || {};
+
+  if(!perms[screen]) return false;
+
+  return perms[screen].includes(role);
+
+}
+
 async function showScreen(screen){
+  if(!isScreenAllowed(screen)){
+    console.warn("Access denied", screen);
+    
+    screen = "accessDenied";
+  }
+
   if (!APP_STORE.loaded) {
     await loadInitialData();
   }
@@ -291,6 +340,9 @@ async function showScreen(screen){
 
     if(screen==="items" && window.applyItemsFilters)
       applyItemsFilters();
+
+    if(screen==="finance" && window.initFinance)
+      initFinance();  // refresh finance data
   }
 }
 
@@ -298,17 +350,17 @@ async function showScreen(screen){
 
 async function loadInitialData(){
   try{
-
     const token = getAuthToken();
 
     const res = await fetch(
-      `${scriptURL}?token=${token}&apiKey=MadhavStreetSecret`
+      `${scriptURL}?token=${token}&apiKey=${CONFIG.apiKey}`
     );
     const data=await res.json();
 
     Object.assign(APP_STORE,{
       menuData:data.menu||[],
-      staffData:data.staffNames||[],
+      // staffData:data.staffNames||[],
+      staffData:data.staff||[],
       tableData:data.tables||[],
       bookingData:data.bookings||[],
       eventTypes:data.eventTypes||[],
@@ -316,7 +368,7 @@ async function loadInitialData(){
       orderSources:data.orderSources||[],
 
       orderData:data.orders||[],
-      tableStatusData:data.tableStatus||{},
+      tableStatus:data.tableStatus||{},
       summaryData:data.summary||{},
 
       expenseCategories:data.expenseCategories||[],
@@ -379,7 +431,7 @@ function setFormActions() {
     form.action = CONFIG.scriptURL;
 
     // 🔥 ADD SECURITY FIELDS
-    addHidden(form,"apiKey","MadhavStreetSecret");
+    addHidden(form,"apiKey", CONFIG.apiKey);
     addHidden(form,"token", getAuthToken());
   });
 }
@@ -442,7 +494,7 @@ function updateFormTokens(){
     const form = document.getElementById(id);
     if (!form) return;
 
-    addHidden(form,"apiKey","MadhavStreetSecret");
+    addHidden(form,"apiKey", CONFIG.apiKey);
     addHidden(form,"token",token);
   });
 }

@@ -76,3 +76,11 @@
   .attendance-stats{ flex-direction:column }
   .page-actions{ flex-direction:column }
 }
+
+.staff-disabled{
+  opacity:0.45;
+}
+
+.staff-disabled button{
+  pointer-events:none;
+}

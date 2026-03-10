@@ -8,6 +8,10 @@ function isLoggedIn() {
 
 async function doLogin() {
 
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  btn.innerText = "Logging in...";
+
   const user =
     (document.getElementById("loginUsername")?.value || "")
       .toString()
@@ -39,6 +43,8 @@ async function doLogin() {
     if (!result.success) {
       document.getElementById("loginError").innerText =
         "Invalid username or password";
+      btn.disabled = false;
+      btn.innerText = "Login";
       return;
     }
 
@@ -81,7 +87,8 @@ async function doLogin() {
     startApp();
 
   } catch (err) {
-
+    btn.disabled = false;
+    btn.innerText = "Login";
     console.error("Login error:", err);
 
     document.getElementById("loginError").innerText =
@@ -140,3 +147,38 @@ function forceLogout(){
 }
 
 window.forceLogout = forceLogout;
+
+/* ================= LOGIN UI ================= */
+
+function initLoginUI(){
+
+  const pwd = document.getElementById("loginPassword");
+  const btn = document.getElementById("showPasswordBtn");
+  const field = document.getElementById("pwdField");
+
+  if(!pwd || !btn || !field) return;
+
+  btn.addEventListener("click", () => {
+
+    const hidden = pwd.type === "password";
+
+    pwd.type = hidden ? "text" : "password";
+
+    field.classList.toggle("showing", hidden);
+
+  });
+
+  // restore remember-me
+  try {
+
+    if(localStorage.getItem("ms_remember") === "1"){
+
+      const rem = document.getElementById("rememberMe");
+
+      if(rem) rem.checked = true;
+
+    }
+
+  } catch(err){}
+
+}

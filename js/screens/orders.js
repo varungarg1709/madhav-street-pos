@@ -734,3 +734,13 @@ function hideOrdersSkeleton() {
   const sk = document.getElementById("ordersSkeleton");
   if (sk) sk.style.display = "none";
 }
+
+function getStaffName(code){
+
+  const staff = APP_STORE.staffData || [];
+
+  const found = staff.find(s => s.code === code);
+
+  return found ? found.name : code;
+
+}

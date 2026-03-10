@@ -8,7 +8,7 @@ async function postAPI(mode, payload = {}) {
 
     // required fields
     formData.append("mode", mode);
-    formData.append("apiKey", CONFIG.apiKey || "MadhavStreetSecret");
+    formData.append("apiKey", CONFIG.apiKey);
     formData.append("token", getAuthToken());
 
     // attach payload fields

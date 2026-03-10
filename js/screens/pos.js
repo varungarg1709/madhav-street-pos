@@ -1,3 +1,4 @@
+let selectedTables = [];
 let categories = [];
 let tableOrders = {};
 let currentTable = "GENERAL";
@@ -12,6 +13,9 @@ function initPOS() {
   setupPOS();
   populateOrderDetails();
   loadEditOrderIfAny();
+  buildStaffDropdown();
+  buildStaffSelector();
+  renderTableGrid();
 
   // Notify that POS screen finished initial rendering and is ready
   try {
@@ -19,164 +23,281 @@ function initPOS() {
   } catch (e) {}
 }
 
-function loadEditOrderIfAny() {
+
+function loadEditOrderIfAny(){
+
   const order = window.EDIT_ORDER;
-  if (!order) return;
+  if(!order) return;
 
   editOrderKey = order.table || "GENERAL";
-  currentTable = editOrderKey;
-
   editingBillNo = order.billNo;
 
-  document.getElementById("billNumber").innerText =
-    order.billNo || "";
+  /* BASIC FIELDS */
 
-  document.getElementById("customerName").value =
-    order.name || "";
+  document.getElementById("billNumber").innerText = order.billNo || "";
+  document.getElementById("customerName").value = order.name || "";
+  document.getElementById("phone").value = order.phone || "";
+  document.getElementById("orderDate").value = order.date || getTodayLocal();
 
-  document.getElementById("phone").value =
-    order.phone || "";
+  /* TABLE RESTORE */
 
-  document.getElementById("orderDate").value =
-    order.date || getTodayLocal();
+  selectedTables = (order.table || "")
+    .split(",")
+    .map(t => t.trim())
+    .filter(Boolean);
 
-  // tables (multi select support)
-  const tableEl = document.getElementById("tableNo");
-  if (tableEl && order.table) {
-    const tables = order.table.split(",").map(t => t.trim());
-    Array.from(tableEl.options).forEach(opt => {
-      opt.selected = tables.includes(opt.value);
+  currentTable = selectedTables.join(",");
+
+  const tableSelect = document.getElementById("tableNo");
+
+  if(tableSelect && selectedTables.length){
+    Array.from(tableSelect.options).forEach(opt=>{
+      opt.selected = selectedTables.includes(opt.value);
     });
   }
 
-  // order type
-  if (order.orderType) {
+  renderTableGrid();
+
+  /* ORDER TYPE */
+
+  if(order.orderType){
+
     const typeRadio = document.querySelector(
       `input[name="orderType"][value="${order.orderType}"]`
     );
-    if (typeRadio) typeRadio.checked = true;
+
+    if(typeRadio) typeRadio.checked = true;
+
   }
 
-  // load items
+  /* ITEMS */
+
   tableOrders = {};
+
   let parsedItems = {};
 
-  try {
+  try{
     parsedItems = JSON.parse(order.itemsJSON || "{}");
-  } catch {}
+  }catch{}
 
   tableOrders[currentTable] = parsedItems;
 
+  /* DISCOUNT BEFORE RENDER */
+
+  const discountEl = document.getElementById("discount");
+  if(discountEl) discountEl.value = order.discount || "";
+
   renderBill();
 
-  // restore async fields
-  requestAnimationFrame(() => {
+  /* RESTORE REMAINING FIELDS AFTER UI READY */
 
-    function setSelectValue(selectEl, value) {
-      if (!selectEl) return;
+  requestAnimationFrame(()=>{
+
+    function setSelectValue(selectEl,value){
+
+      if(!selectEl) return;
+
       const v = value || "";
 
-      // try exact match first
-      let opt = Array.from(selectEl.options).find(o => o.value === v);
-      if (!opt) {
-        // try case-insensitive match on value or text
-        opt = Array.from(selectEl.options).find(o => (o.value||"").toLowerCase() === (v||"").toLowerCase() || (o.text||"").toLowerCase() === (v||"").toLowerCase());
+      let opt = Array.from(selectEl.options)
+        .find(o => o.value === v);
+
+      if(!opt){
+        opt = Array.from(selectEl.options)
+          .find(o =>
+            (o.value || "").toLowerCase() === v.toLowerCase() ||
+            (o.text || "").toLowerCase() === v.toLowerCase()
+          );
       }
 
-      if (opt) {
+      if(opt){
         selectEl.value = opt.value;
-      } else {
-        // if value is non-empty and option not found, append a custom option so it can be selected
-        if (v) {
-          const newOpt = document.createElement('option');
-          newOpt.value = v;
-          newOpt.textContent = v;
-          selectEl.appendChild(newOpt);
-          selectEl.value = v;
-        } else {
-          selectEl.value = "";
-        }
+      }else if(v){
+        const newOpt = document.createElement("option");
+        newOpt.value = v;
+        newOpt.textContent = v;
+        selectEl.appendChild(newOpt);
+        selectEl.value = v;
       }
+
     }
 
-    // populate order source with common alternate keys and simple inference
-    const sourceVal = order.orderSource || order.order_source || order.source || "";
-    // if still empty, infer Dine-in when table list looks like multiple tables
-    let inferredSource = sourceVal;
-    if (!inferredSource && order.table) {
-      const t = String(order.table);
-      if (t.includes(",") || /T\d+/i.test(t)) inferredSource = "Dine-in";
-    }
-    setSelectValue(document.getElementById("orderSource"), inferredSource);
+    /* TOTAL MEMBERS */
 
-    document.getElementById("discount").value = order.discount || "";
-
-    // total members: accept common keys or infer from parsed items
     const membersEl = document.getElementById("totalMembers");
-    if (membersEl) {
-      let m = order.totalMembers || order.total_members || order.members || "";
-      if (!m) {
-        // infer from item quantities
-        try {
-          let sum = 0;
-          Object.values(parsedItems || {}).forEach(raw => {
-            if (raw == null) return;
-            if (typeof raw === 'number') sum += Number(raw) || 0;
-            else if (typeof raw === 'object') sum += Number(raw.qty || raw.quantity || 0) || 0;
-          });
-          if (sum) m = String(sum);
-        } catch (e) {}
-      }
-      membersEl.value = m || "";
+
+    if(membersEl){
+      membersEl.value =
+        order.totalMembers ||
+        order.total_members ||
+        order.members ||
+        "";
     }
 
-    document.getElementById("feedback").value = order.feedback || "";
+    /* FEEDBACK */
 
-    setSelectValue(document.getElementById("eventType"), order.eventType || order.event_type || order.event || "");
+    const feedbackEl = document.getElementById("feedback");
+    if(feedbackEl){
+      feedbackEl.value = order.feedback || "";
+    }
 
-    setSelectValue(document.getElementById("deliveredBy"), order.deliveredBy || order.receivedBy || "");
+    /* EVENT TYPE */
 
-    // payment JSON
+    setSelectValue(
+      document.getElementById("eventType"),
+      order.eventType ||
+      order.event_type ||
+      order.event ||
+      ""
+    );
+
+    /* ORDER SOURCE */
+
+    setSelectValue(
+      document.getElementById("orderSource"),
+      order.orderSource ||
+      order.order_source ||
+      order.source ||
+      ""
+    );
+
+    /* DELIVERED BY */
+
+    setSelectValue(
+      document.getElementById("deliveredBy"),
+      order.deliveredBy ||
+      order.receivedBy ||
+      ""
+    );
+
+    /* STAFF CHIP HIGHLIGHT */
+
+    if(order.deliveredBy){
+
+      const chips = document.querySelectorAll(".staff-chip");
+
+      chips.forEach(chip=>{
+
+        if(
+          chip.innerText.trim() ===
+          getStaffName(order.deliveredBy).trim()
+        ){
+          chip.classList.add("active");
+        }
+
+      });
+
+    }
+
+    /* PAYMENT RESTORE */
+
     let payment = {};
-    try {
-      payment = JSON.parse(order.paymentMode || "{}");
-    } catch {}
 
-    document.getElementById("cashAmount").value =
-      payment.cash || "";
+    try{
 
-    document.getElementById("upiAmount").value =
-      payment.upi || "";
+      const rawPayment =
+        order.paymentMode ||
+        order.payment_mode ||
+        order.paymentJSON ||
+        order.payment ||
+        "{}";
 
-    document.getElementById("cardAmount").value =
-      payment.card || "";
+      payment =
+        typeof rawPayment === "string"
+        ? JSON.parse(rawPayment)
+        : rawPayment;
 
-    renderBill();
+    }catch(e){
+      console.warn("Payment parse error",e);
+    }
+
+    const cashEl = document.getElementById("cashAmount");
+    const upiEl = document.getElementById("upiAmount");
+    const cardEl = document.getElementById("cardAmount");
+
+    if(cashEl) cashEl.value = payment.cash || "";
+    if(upiEl) upiEl.value = payment.upi || "";
+    if(cardEl) cardEl.value = payment.card || "";
+
     updatePaymentStatus();
+    renderBill();
+
   });
 
+  /* BUTTON */
+
   const saveBtn = document.getElementById("saveBillBtn");
-  if (saveBtn) saveBtn.innerText = "UPDATE ORDER";
+  if(saveBtn) saveBtn.innerText = "UPDATE ORDER";
 
   window.EDIT_ORDER = null;
+
 }
 
 function setupPOS() {
   let today = getTodayLocal();
   document.getElementById("orderDate").value = today;
 
+  document.getElementById("orderDate")
+  .addEventListener("change", () => {
+
+    renderTableGrid();
+
+  });
+
+  document.getElementById("discount")
+  .addEventListener("input", renderBill);
+
   // Tables
   const tableSelect = document.getElementById("tableNo");
   tableSelect.innerHTML = "";
+  console.log("TableStatus:", APP_STORE.tableStatus);
+  
+  const runningItems = getRunningTableItems();
+
   (APP_STORE.tableData || []).forEach(t => {
+
+    const status =
+      (APP_STORE.tableStatus || {})[t.trim()] || "Available";
+
     const opt = document.createElement("option");
+
     opt.value = t;
-    opt.textContent = t;
+
+    let icon = "🟢";
+
+    if(status === "Running") icon = "🔴";
+    if(status === "Partial") icon = "🟡";
+
+    const itemCount = runningItems[t] || 0;
+
+    if(itemCount > 0){
+      opt.textContent = `${t} (${itemCount}) ${icon}`;
+    }else{
+      opt.textContent = `${t} ${icon}`;
+    }
+
     tableSelect.appendChild(opt);
+
   });
 
   // Re-render bill when table changes
-  tableSelect.addEventListener("change", renderBill);
+  tableSelect.addEventListener("change", () => {
+    const table = tableSelect.value;
+    const runningOrder = findRunningOrderForTable(table);
+
+    if(runningOrder){
+      const confirmEdit = confirm(
+        `Table ${table} already has a running order.\nOpen existing bill?`
+      );
+
+      if(confirmEdit){
+        window.EDIT_ORDER = runningOrder;
+        loadEditOrderIfAny();
+        return;
+      }
+    }
+    renderBill();
+  });
 
   // Order sources
   const sourceSelect = document.getElementById("orderSource");
@@ -198,6 +319,27 @@ function setupPOS() {
       <span>${type}</span>
     `;
     typeContainer.appendChild(label);
+  });
+
+  document
+  .querySelectorAll('input[name="orderType"]')
+  .forEach(radio => {
+
+    radio.addEventListener("change", () => {
+
+      const type = radio.value;
+
+      const tableEl = document.getElementById("tableNo");
+
+      if(type === "Dine-in"){
+        tableEl.disabled = false;
+      }else{
+        tableEl.disabled = true;
+        tableEl.selectedIndex = -1;
+      }
+
+    });
+
   });
 
   // Categories
@@ -296,38 +438,38 @@ function filterMenu() {
   });
 }
 
-function getSelectedTable() {
-  // If editing, always use edit table
-  if (editingBillNo && editOrderKey) {
+function getSelectedTable(){
+
+  if(editingBillNo && editOrderKey){
     return editOrderKey;
   }
 
   const typeEl = document.querySelector(
     'input[name="orderType"]:checked'
   );
-  if (!typeEl) return "GENERAL";
 
-  let orderType = typeEl.value;
-  let orderSource =
+  if(!typeEl) return "GENERAL";
+
+  const orderType = typeEl.value;
+  const orderSource =
     document.getElementById("orderSource").value;
 
-  let selectedTables = Array.from(
-    document.getElementById("tableNo").selectedOptions
-  )
-    .map(opt => opt.value)
-    .join(", ");
+  if(orderType === "Dine-in"){
 
-  if (orderType === "Dine-in") {
-    return selectedTables || null;
+    if(selectedTables.length === 0){
+      return null;
+    }
+
+    return selectedTables.join(",");
+
   }
 
-  if (orderSource && orderSource !== "Walk-in") {
+  if(orderSource && orderSource !== "Walk-in"){
     return orderSource.toUpperCase();
   }
 
   return orderType.toUpperCase();
 }
-
 
 function addItem(item) {
   currentTable = getSelectedTable();
@@ -486,7 +628,20 @@ function clearBill() {
   if (!editingBillNo) {
     currentTable = getSelectedTable();
   }
+
   delete tableOrders[currentTable];
+
+  selectedTables = [];
+
+  document
+  .querySelectorAll(".table-btn")
+  .forEach(b => b.classList.remove("table-selected"));
+
+  const tableSelect = document.getElementById("tableNo");
+
+  if(tableSelect){
+    tableSelect.selectedIndex = -1;
+  }
 
   document.getElementById("billItems").innerHTML =
     '<div class="empty-text">Tap menu items to add</div>';
@@ -507,28 +662,12 @@ function clearBill() {
   document.getElementById("phone").value = "";
   document.getElementById("feedback").value = "";
 
-  const membersEl = document.getElementById("totalMembers");
-  if (membersEl) membersEl.value = "";
-
-  const sourceEl = document.getElementById("orderSource");
-  if (sourceEl) sourceEl.selectedIndex = 0;
-
-  const eventEl = document.getElementById("eventType");
-  if (eventEl) eventEl.selectedIndex = 0;
-
-  const deliveredEl = document.getElementById("deliveredBy");
-  if (deliveredEl) deliveredEl.selectedIndex = 0;
-
-  document.getElementById("billNumber").innerText =
-    "MS/--/----/---";
-
-  // reset edit mode
   editingBillNo = null;
   currentTable = "GENERAL";
 
-  // reset save button text
   const saveBtn = document.getElementById("saveBillBtn");
   if (saveBtn) saveBtn.innerText = "SAVE BILL";
+
 }
 
 
@@ -684,7 +823,7 @@ const receiverEl = document.querySelector(
 );
 setHidden(
   "f_receivedBy",
-  receiverEl ? receiverEl.value : "Varun Garg"
+  receiverEl ? receiverEl.value : "MS001"
 );
 
 
@@ -698,6 +837,8 @@ setHidden(
   // reload after backend writes
 setTimeout(() => {
   reloadData(() => {
+    setupPOS();      // rebuild tables
+    renderTableGrid();
     clearBill();
   });
 }, 800);
@@ -748,29 +889,27 @@ setTimeout(() => {
 
 
 function populateOrderDetails() {
+
   // Event Types
   const eventSelect = document.getElementById("eventType");
+
   if (eventSelect) {
+
     eventSelect.innerHTML = '<option value="">Event type</option>';
+
     (APP_STORE.eventTypes || []).forEach(type => {
+
       const opt = document.createElement("option");
+
       opt.value = type;
       opt.textContent = type;
+
       eventSelect.appendChild(opt);
+
     });
+
   }
 
-  // Staff (Delivered By)
-  const staffSelect = document.getElementById("deliveredBy");
-  if (staffSelect) {
-    staffSelect.innerHTML = '<option value="">Delivered by</option>';
-    (APP_STORE.staffData || []).forEach(name => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      staffSelect.appendChild(opt);
-    });
-  }
 }
 
 function toggleBill() {
@@ -881,3 +1020,277 @@ function autoFillCustomerFromPhone() {
 
 // expose helper so other screens can request POS to load an edit order
 window.loadEditOrderIfAny = loadEditOrderIfAny;
+
+
+function buildStaffDropdown(){
+
+  const staff = APP_STORE.staffData || [];
+
+  const delivered = document.getElementById("deliveredBy");
+  const received = document.getElementById("receivedBy");
+
+  if(delivered) delivered.innerHTML = `<option value="">Delivered by</option>`;
+  if(received) received.innerHTML = `<option value="">Received by</option>`;
+
+  staff
+    .filter(s => (s.status || "").toLowerCase() === "active")
+    .sort((a,b)=>a.name.localeCompare(b.name))
+    .forEach(s=>{
+
+      const opt1 = document.createElement("option");
+      opt1.value = s.code;
+      opt1.textContent = s.name;
+
+      const opt2 = opt1.cloneNode(true);
+
+      if(delivered) delivered.appendChild(opt1);
+      if(received) received.appendChild(opt2);
+
+    });
+
+}
+
+function buildStaffSelector(){
+
+  const container = document.getElementById("staffSelector");
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const staff = (APP_STORE.staffData || [])
+  .filter(s => (s.status || "").toLowerCase() === "active")
+  .sort((a,b)=>a.name.localeCompare(b.name));
+
+  staff.forEach(s => {
+
+    const btn = document.createElement("div");
+
+    btn.className = "staff-chip";
+
+    btn.innerText = s.name;
+
+    btn.onclick = () => {
+
+      document
+        .querySelectorAll(".staff-chip")
+        .forEach(el => el.classList.remove("active"));
+
+      btn.classList.add("active");
+
+      document.getElementById("deliveredBy").value = s.code;
+
+    };
+
+    container.appendChild(btn);
+
+  });
+
+}
+
+function getStaffName(code){
+
+  const staff = APP_STORE.staffData || [];
+
+  const found = staff.find(s => s.code === code);
+
+  return found ? found.name : code;
+
+}
+
+function findRunningOrderForTable(table){
+
+  const orders = APP_STORE.orderData || [];
+
+  const selectedDate =
+    document.getElementById("orderDate")?.value ||
+    getTodayLocal();
+
+  return orders.find(o => {
+
+    if(!o.table) return false;
+
+    const tables = o.table.split(",").map(t => t.trim());
+
+    return (
+      tables.includes(table) &&
+      o.date === selectedDate &&
+      (o.status === "Pending" || o.status === "Partial")
+    );
+
+  });
+
+}
+
+function getRunningTableItems(){
+
+  const orders = APP_STORE.orderData || [];
+
+  const selectedDate =
+    document.getElementById("orderDate")?.value ||
+    getTodayLocal();
+
+  const tableItems = {};
+
+  orders.forEach(o => {
+
+    if(
+      o.orderType === "Dine-in" &&
+      o.date === selectedDate &&
+      (o.status === "Pending" || o.status === "Partial") &&
+      o.table
+    ){
+
+      let parsed = {};
+
+      try{
+        parsed = JSON.parse(o.itemsJSON || "{}");
+      }catch{}
+
+      let count = 0;
+
+      Object.values(parsed).forEach(it=>{
+        count += Number(it.qty || 0);
+      });
+
+      const tables = o.table.split(",").map(t=>t.trim());
+
+      tables.forEach(t=>{
+        tableItems[t] = (tableItems[t] || 0) + count;
+      });
+
+    }
+
+  });
+
+  return tableItems;
+
+}
+
+function renderTableGrid(){
+
+  const grid = document.getElementById("tableGrid");
+  if(!grid) return;
+
+  grid.innerHTML = "";
+
+  const tables = APP_STORE.tableData || [];
+  const status = APP_STORE.tableStatus || {};
+  const runningItems = getRunningTableItems();
+
+  tables.forEach(t=>{
+
+    const btn = document.createElement("button");
+
+    btn.className = "table-btn";
+    btn.id = "tableBtn_" + t;
+
+    const itemCount = runningItems[t] || 0;
+    const tableStatus = status[t];
+
+    if(tableStatus === "Running"){
+
+      btn.classList.add("table-running");
+      btn.innerText = `${t} 🔴 ${itemCount}`;
+
+    } else {
+
+      btn.classList.add("table-free");
+      btn.innerText = `${t} 🟢`;
+
+    }
+
+    if(selectedTables.includes(t)){
+      btn.classList.add("table-selected");
+    }
+
+    btn.onclick = () => toggleTable(t);
+
+    grid.appendChild(btn);
+
+  });
+
+}
+
+function selectTable(table){
+
+  const runningOrder = findRunningOrderForTable(table);
+
+  if(runningOrder){
+
+    const confirmEdit = confirm(
+      `Table ${table} already has a running order.\nOpen existing bill?`
+    );
+
+    if(confirmEdit){
+
+      window.EDIT_ORDER = runningOrder;
+
+      loadEditOrderIfAny();
+
+      return;
+    }
+
+  }
+
+  currentTable = table;
+
+  renderTableGrid();
+
+  renderBill();
+
+}
+
+function toggleTable(table){
+
+  const runningOrder = findRunningOrderForTable(table);
+
+  if(runningOrder){
+
+    const confirmEdit = confirm(
+      `Table ${table} already has a running order.\nOpen existing bill?`
+    );
+
+    if(confirmEdit){
+
+      window.EDIT_ORDER = runningOrder;
+      loadEditOrderIfAny();
+      return;
+
+    }
+
+  }
+
+  const btn = document.getElementById("tableBtn_" + table);
+
+  if(selectedTables.includes(table)){
+
+    selectedTables = selectedTables.filter(t => t !== table);
+
+    if(btn) btn.classList.remove("table-selected");
+
+  } else {
+
+    if(!selectedTables.includes(table)){
+      selectedTables.push(table);
+    }
+
+    if(btn) btn.classList.add("table-selected");
+
+  }
+
+  currentTable = selectedTables.join(",");
+
+  /* sync dropdown if present */
+
+  const tableSelect = document.getElementById("tableNo");
+
+  if(tableSelect){
+
+    Array.from(tableSelect.options).forEach(opt=>{
+      opt.selected = selectedTables.includes(opt.value);
+    });
+
+  }
+
+}
