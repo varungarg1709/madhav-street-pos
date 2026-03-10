@@ -9,6 +9,16 @@ let ordersState = {};
 let ordersInitializing = false;
 let dashboardPeriod = "today";
 
+function getCurrentRole(){
+
+  return (
+    sessionStorage.getItem("ms_role") ||
+    localStorage.getItem("ms_role") ||
+    "guest"
+  );
+
+}
+
 function normalizeDate(val) {
   if (!val) return "";
   return val.trim().slice(0, 10);
@@ -157,9 +167,11 @@ function renderVisibleRows() {
             </span>
           </td>
           <td>
-            <button onclick="editOrder('${order.billNo}')">
-              Edit
-            </button>
+            ${
+              (order.status === "Paid" && getCurrentRole() !== "admin")
+                ? `<span class="order-locked">🔒</span>`
+                : `<button onclick="editOrder('${order.billNo}')">Edit</button>`
+            }
           </td>
         </tr>
       `;
@@ -249,9 +261,11 @@ function renderVisibleRows() {
           </span>
         </td>
         <td>
-          <button onclick="editOrder('${order.billNo}')">
-            Edit
-          </button>
+          ${
+            (order.status === "Paid" && getCurrentRole() !== "admin")
+              ? `<span class="order-locked">🔒</span>`
+              : `<button onclick="editOrder('${order.billNo}')">Edit</button>`
+          }
         </td>
       </tr>
     `;
@@ -423,92 +437,6 @@ function applyOrderFilters() {
   renderPartnerStats(stats);
 }
 
-// function editOrder(billNo) {
-
-//   const order =
-//     (APP_STORE.orderData || [])
-//       .find(o => o.billNo === billNo);
-
-//   if (!order) {
-//     alert("Order not found");
-//     return;
-//   }
-
-//   // store globally so POS can access
-//   window.EDIT_ORDER = order;
-
-//   // switch screen
-//   navigateTo("pos");
-
-//   // wait until POS DOM loads
-//   setTimeout(() => {
-
-//     // tell POS we are editing
-//     editingBillNo = billNo;
-
-//     // show bill number
-//     const billEl = document.getElementById("billNumber");
-
-//     if (billEl) billEl.innerText = billNo;
-
-//     // customer name
-//     const nameEl = document.getElementById("customerName");
-
-//     if (nameEl)
-//       nameEl.value = order.name || "";
-
-//     // phone
-//     const phoneEl =
-//       document.getElementById("phone");
-
-//     if (phoneEl)
-//       phoneEl.value = order.phone || "";
-
-//     // date
-//     const dateEl = document.getElementById("orderDate");
-
-//     if (dateEl && order.date)
-//       dateEl.value = toLocalDateString(order.date);
-
-//     // discount
-//     const discEl = document.getElementById("discount");
-
-//     if (discEl)
-//       discEl.value = order.discount || "";
-
-//     // received by
-//     if (order.receivedBy) {
-//       const receiverRadio = document.querySelector(
-//         `input[name="receivedBy"][value="${order.receivedBy}"]`
-//       );
-//       if (receiverRadio)
-//         receiverRadio.checked = true;
-//     }
-
-//     // clear table memory
-//     tableOrders = {};
-
-//     // parse items safely
-//     let parsedItems = {};
-
-//     try {
-//       if (order.itemsJSON &&
-//           order.itemsJSON.startsWith("{")) {
-//         parsedItems =
-//           JSON.parse(order.itemsJSON);
-//       }
-//     } catch (e) {
-//       console.error("Item parse error:", e);
-//     }
-
-//     currentTable = "EDIT_ORDER";
-//     tableOrders[currentTable] = parsedItems;
-
-//     renderBill();
-
-//   }, 150); // IMPORTANT delay
-
-// }
 
 function editOrder(billNo) {
 

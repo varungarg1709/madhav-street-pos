@@ -1,7 +1,7 @@
 // config.js (PRIVATE - DO NOT UPLOAD)
 
 const CONFIG = {
-  scriptURL: "https://script.google.com/macros/s/AKfycbxzavuCff3dsLX8akPWkwI0HPcv8f_ug82jwDkqf-v_xPfJgydTtqy90pY5mgZaSeM/exec",
+  scriptURL: "https://script.google.com/macros/s/AKfycby02sF7AV4eihYYZI5QDdMiTblYwx0K4M7Wjh1Xikhm1exUs-VmmRK9YPu8atzoxeUL/exec",
 
   apiKey: "MadhavStreetSecret",
 
