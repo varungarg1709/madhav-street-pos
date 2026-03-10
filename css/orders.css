@@ -287,3 +287,8 @@
   }
 
 }
+
+.order-locked {
+  font-size: 16px;
+  color: #999;
+}
