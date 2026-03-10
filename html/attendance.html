@@ -1,40 +1,88 @@
 <div id="attendanceScreen" class="screen">
 
+  <!-- PAGE HEADER -->
+
   <div class="page-header">
+
     <h2>Staff Attendance</h2>
+
     <div class="page-actions">
-      <button class="ghost-btn" onclick="markAllPresent()">Mark All Present</button>
-      <button class="primary-btn" onclick="saveAllAttendance()">Save Attendance</button>
+
+      <button class="ghost-btn" onclick="markAllPresent()">
+        Mark All Present
+      </button>
+
+      <button class="primary-btn" onclick="saveAllAttendance()">
+        Save Attendance
+      </button>
+
     </div>
+
   </div>
 
+
+  <!-- STATS -->
+
   <div class="attendance-stats">
+
     <div class="stat-card">
       <div class="stat-title">Total Staff</div>
       <div class="stat-value" id="statTotal">0</div>
     </div>
+
     <div class="stat-card">
       <div class="stat-title">Present</div>
       <div class="stat-value text-success" id="statPresent">0</div>
     </div>
+
     <div class="stat-card">
       <div class="stat-title">Absent</div>
       <div class="stat-value text-danger" id="statAbsent">0</div>
     </div>
+
   </div>
+
+
+  <!-- STAFF LIST CARD -->
 
   <div class="card staff-card">
+
     <div class="staff-list-header">
-      <input type="date" id="attendanceDate" />
-      <input type="search" id="staffSearch" placeholder="Search staff..." oninput="filterStaffList()" />
+
+      <!-- DATE FILTER -->
+
+      <input 
+        type="date" 
+        id="attendanceDate"
+        onchange="initAttendanceCache();renderStaffList();"
+      />
+
+      <!-- SEARCH STAFF -->
+
+      <input 
+        type="search"
+        id="staffSearch"
+        placeholder="Search staff..."
+        oninput="filterStaffList()"
+      />
+
     </div>
+
+    <!-- STAFF LIST -->
+
     <ul class="staff-list" id="staffList"></ul>
+
   </div>
 
-  <!-- legacy table (kept for compatibility) -->
+
+  <!-- LEGACY TABLE (hidden for compatibility) -->
+
   <div class="card" style="display:none">
+
     <table class="data-table">
+
       <thead>
+
         <tr>
           <th>Date</th>
           <th>Staff</th>
@@ -42,9 +90,13 @@
           <th>Check Out</th>
           <th>Status</th>
         </tr>
+
       </thead>
+
       <tbody id="attendanceTableBody"></tbody>
+
     </table>
+
   </div>
 
 </div>

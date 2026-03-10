@@ -1,13 +1,15 @@
 <div id="loginScreen" class="login-wrapper">
 
   <div class="login-card">
-    <h2>Madhav Street POS</h2>
-    <p>Staff Login</p>
+
+    <img src="../logo.png" class="login-logo">
+    <h1 class="login-title">Madhav Street POS</h1>
+    <p class="login-sub">Staff Login</p>
 
     <form id="loginForm" onsubmit="doLogin(); return false;">
 
       <!-- USERNAME -->
-      <div class="filter-group">
+      <div class="login-field">
         <label for="loginUsername">Username</label>
 
         <input
@@ -17,11 +19,13 @@
           autocomplete="username"
           required
           autofocus
-        />
+        >
       </div>
 
       <!-- PASSWORD -->
-      <div class="password-field" id="pwdField">
+      <div class="login-field password-field" id="pwdField">
+
+        <label for="loginPassword">Password</label>
 
         <input
           type="password"
@@ -36,33 +40,30 @@
           id="showPasswordBtn"
           class="toggle-password"
           aria-label="Show password"
-          title="Show password"
         >
           <img class="icon icon-eye"
                src="assets/icons/eye.svg"
-               width="18"
-               height="18"
-               alt="Show">
+               width="18">
 
           <img class="icon icon-eye-off"
                src="assets/icons/eye-off.svg"
-               width="18"
-               height="18"
-               alt="Hide">
+               width="18">
         </button>
 
       </div>
 
       <!-- REMEMBER -->
-      <div class="row remember-row">
+      <div class="remember-row">
         <label class="remember">
           <input type="checkbox" id="rememberMe">
           Remember me
         </label>
       </div>
 
-      <!-- LOGIN BUTTON -->
-      <button type="submit">Login</button>
+      <!-- BUTTON -->
+      <button id="loginBtn" type="submit">
+        Login
+      </button>
 
     </form>
 
@@ -72,36 +73,3 @@
   </div>
 
 </div>
-
-<script>
-(function(){
-
-  const pwd = document.getElementById("loginPassword");
-  const btn = document.getElementById("showPasswordBtn");
-  const field = document.getElementById("pwdField");
-
-  if (pwd && btn && field) {
-
-    btn.addEventListener("click", () => {
-      const isPwd = pwd.type === "password";
-      pwd.type = isPwd ? "text" : "password";
-
-      field.classList.toggle("showing", isPwd);
-
-      btn.setAttribute(
-        "aria-label",
-        isPwd ? "Hide password" : "Show password"
-      );
-    });
-  }
-
-  // restore remember-me
-  try {
-    if (localStorage.getItem("ms_remember") === "1") {
-      const rem = document.getElementById("rememberMe");
-      if (rem) rem.checked = true;
-    }
-  } catch(e){}
-
-})();
-</script>

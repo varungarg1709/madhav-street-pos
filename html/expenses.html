@@ -30,7 +30,7 @@
     </div>
 
     <div class="filter-group">
-      <label>Partner</label>
+      <label>Paid By</label>
       <select id="expensesPartnerFilter"
               onchange="applyExpenseFilters()">
         <option value="">All</option>
@@ -95,18 +95,19 @@
       <div class="table-wrapper">
         <table class="data-table">
           <thead>
-            <tr>
-                <th>S.No</th>
-              <th>Date</th>
-              <th>Category</th>
-              <th>Type</th>
-              <th>Vendor</th>
-              <th>Mode</th>
-              <th>Partner</th>
-              <th>Amount</th>
-              <th>Comment</th>
-            </tr>
-          </thead>
+<tr>
+  <th>S.No</th>
+  <th>Date</th>
+  <th>Category</th>
+  <th>Type</th>
+  <th>Vendor</th>
+  <th>Mode</th>
+  <th>Procured By</th>
+  <th>Paid By</th>
+  <th class="amount-col">Amount</th>
+  <th class="comment-col">Comment</th>
+</tr>
+</thead>
           <tbody id="expensesTableBody"></tbody>
         </table>
       </div>

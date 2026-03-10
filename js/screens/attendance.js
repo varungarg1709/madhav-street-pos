@@ -1,292 +1,414 @@
-function initAttendance() {
+let attendanceCache = {};
+
+/* ================= INIT ================= */
+
+function initAttendance(){
 
   const today = getTodayLocal();
 
-  // set date control used by the staff-list and quick actions
-  const dateEl = document.getElementById("attendanceDate") || document.getElementById("a_date");
-  if (dateEl) dateEl.value = today;
+  const dateEl =
+    document.getElementById("attendanceDate") ||
+    document.getElementById("a_date");
+
+  if(dateEl) dateEl.value = today;
 
   populateStaffDropdown();
-  // initialize UI cache and render enhanced views
+
   initAttendanceCache();
+
   renderQuickAttendance();
   renderAttendanceStats();
   renderStaffList();
+
 }
 
-function populateStaffDropdown() {
+/* ================= STAFF DROPDOWN ================= */
 
-  const staff =
-    APP_STORE.staffData || [];
+function populateStaffDropdown(){
 
-  const select =
-    document.getElementById("a_staff");
+  const staff = APP_STORE.staffData || [];
+  const select = document.getElementById("a_staff");
 
-  // If legacy select not present (new UI), skip populating it
-  if (!select) return;
+  if(!select) return;
 
   select.innerHTML = "";
 
   staff.forEach(s=>{
-    const opt=document.createElement("option");
-    opt.value=s;
-    opt.textContent=s;
+
+    const opt = document.createElement("option");
+
+    opt.value = s.code;
+    opt.textContent = s.name;
+
     select.appendChild(opt);
+
   });
+
 }
 
-function renderAttendance() {
+/* ================= QUICK ATTENDANCE ================= */
 
-  const list =
-    APP_STORE.attendanceData || [];
-
-  const tbody =
-    document.getElementById("attendanceTableBody");
-
-  tbody.innerHTML="";
-
-  list.forEach(a=>{
-
-    const tr=document.createElement("tr");
-
-    tr.innerHTML=`
-      <td>${a.date || ""}</td>
-      <td>${a.staff || ""}</td>
-      <td>${a.checkIn || "-"}</td>
-      <td>${a.checkOut || "-"}</td>
-      <td>${a.status || ""}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderQuickAttendance() {
+function renderQuickAttendance(){
 
   const container =
     document.getElementById("quickAttendance");
 
-  if (!container) return;
+  if(!container) return;
 
   const staff = APP_STORE.staffData || [];
 
   container.innerHTML = "";
 
-  staff.forEach(name => {
+  staff.forEach(s=>{
+
     const row = document.createElement("div");
     row.className = "quick-row";
-    row.innerHTML = `<span>${name}</span>`;
-    const presentBtn = document.createElement('button'); presentBtn.className='present-btn'; presentBtn.innerText='Present'; presentBtn.onclick = ()=> toggleAttendanceLocal(name,'Present');
-    const absentBtn = document.createElement('button'); absentBtn.className='absent-btn'; absentBtn.innerText='Absent'; absentBtn.onclick = ()=> toggleAttendanceLocal(name,'Absent');
-    row.appendChild(presentBtn); row.appendChild(absentBtn);
+
+    row.innerHTML = `<span>${s.name}</span>`;
+
+    const presentBtn = document.createElement("button");
+    presentBtn.className = "present-btn";
+    presentBtn.innerText = "Present";
+    presentBtn.onclick = ()=>toggleAttendanceLocal(s.code,"Present");
+
+    const absentBtn = document.createElement("button");
+    absentBtn.className = "absent-btn";
+    absentBtn.innerText = "Absent";
+    absentBtn.onclick = ()=>toggleAttendanceLocal(s.code,"Absent");
+
+    row.appendChild(presentBtn);
+    row.appendChild(absentBtn);
+
     container.appendChild(row);
+
   });
+
 }
 
-function filterStaffList(){
-  const q = (document.getElementById('staffSearch')||{}).value?.toLowerCase()||'';
-  const items = Array.from(document.getElementById('staffList').children||[]);
-  items.forEach(li=>{
-    const name = li.querySelector('.staff-name')?.innerText.toLowerCase()||'';
-    li.style.display = name.includes(q)?'flex':'none';
-  });
-}
+/* ================= LOCAL TOGGLE ================= */
 
-async function toggleAttendanceLocal(staff, status){
+async function toggleAttendanceLocal(code,status){
 
-  if (!attendanceCache[staff]) {
-    attendanceCache[staff] = {
-      status: '',
-      checkIn: '',
-      checkOut: '',
-      notes: ''
+  if(!attendanceCache[code]){
+
+    attendanceCache[code] = {
+      status:"",
+      checkIn:"",
+      checkOut:"",
+      notes:""
     };
+
   }
 
-  const oldStatus = attendanceCache[staff].status;
+  const oldStatus = attendanceCache[code].status;
 
-  // Optimistic UI update
-  attendanceCache[staff].status = status;
+  attendanceCache[code].status = status;
+
   renderStaffList();
 
-  const result = await saveAttendanceForStaff(staff, status);
+  const result = await saveAttendanceForStaff(code,status);
 
-  // If failed → revert UI
-  if (!result) {
-    attendanceCache[staff].status = oldStatus;
+  if(!result){
+
+    attendanceCache[code].status = oldStatus;
+
     renderStaffList();
-    showToast("Save failed", { type: "error" });
+
+    showToast("Save failed",{type:"error"});
+
   }
+
 }
 
-async function saveAttendanceForStaff(staff, status){
+/* ================= SAVE STAFF ATTENDANCE ================= */
+
+async function saveAttendanceForStaff(code,status){
 
   const date =
-    document.getElementById("attendanceDate")?.value
-    || getTodayLocal();
+    document.getElementById("attendanceDate")?.value ||
+    getTodayLocal();
 
-  const result = await postAPI("attendance", {
-    date: date,
-    staff: staff,
-    checkIn: "",
-    checkOut: "",
-    status: status,
-    notes: "Marked from UI"
+  const staff =
+    (APP_STORE.staffData||[])
+    .find(s=>s.code===code);
+
+  const result = await postAPI("attendance",{
+
+    date:date,
+    staffCode:code,
+    staffName:staff?.name || "",
+
+    checkIn:"",
+    checkOut:"",
+    status:status,
+    notes:"Marked from UI"
+
   });
 
-  if (!result) return;
+  if(!result) return;
 
-  attendanceCache[staff] = attendanceCache[staff] || {};
-  attendanceCache[staff].status = status;
+  attendanceCache[code].status = status;
 
   renderAttendanceStats();
-  showToast(staff + " marked " + status, { type: "success" });
+
+  showToast(staff?.name+" marked "+status,{type:"success"});
+
   return true;
+
 }
 
+/* ================= MARK ALL ================= */
+
 function markAllPresent(){
-  (APP_STORE.staffData||[]).forEach(s=>{ attendanceCache[s] = attendanceCache[s]||{}; attendanceCache[s].status = 'Present'; });
+
+  (APP_STORE.staffData||[]).forEach(s=>{
+
+    attendanceCache[s.code] =
+      attendanceCache[s.code] || {};
+
+    attendanceCache[s.code].status = "Present";
+
+  });
+
   renderStaffList();
+
 }
+
+/* ================= SAVE ALL ================= */
 
 async function saveAllAttendance(){
 
   const date =
-    document.getElementById("attendanceDate")?.value
-    || getTodayLocal();
+    document.getElementById("attendanceDate")?.value ||
+    getTodayLocal();
 
-  const entries = Object.keys(attendanceCache || {});
+  const entries = Object.keys(attendanceCache||{});
 
-  const requests = entries.map(staff => {
+  const requests = entries.map(code=>{
 
-    const entry = attendanceCache[staff];
+    const entry = attendanceCache[code];
 
-    return postAPI("attendance", {
-      date: date,
-      staff: staff,
-      checkIn: entry.checkIn || "",
-      checkOut: entry.checkOut || "",
-      status: entry.status || "",
-      notes: entry.notes || ""
+    const staff =
+      (APP_STORE.staffData||[])
+      .find(s=>s.code===code);
+
+    return postAPI("attendance",{
+
+      date:date,
+      staffCode:code,
+      staffName:staff?.name || "",
+
+      checkIn:entry.checkIn || "",
+      checkOut:entry.checkOut || "",
+      status:entry.status || "",
+      notes:entry.notes || ""
+
     });
 
   });
 
   await Promise.all(requests);
 
-  showToast("Attendance saved", { type: "success" });
-  reloadData(() => initAttendance());
+  showToast("Attendance saved",{type:"success"});
+
+  reloadData(()=>initAttendance());
+
 }
 
-async function markAttendance(staff, status){
-  const date =
-    document.getElementById("attendanceDate")?.value
-    || getTodayLocal();
-
-  const result = await postAPI("attendance", {
-    date: date,
-    staff: staff,
-    checkIn: "",
-    checkOut: "",
-    status: status,
-    notes: "EOD mark"
-  });
-
-  if (!result) return;
-
-  showToast(staff + " marked " + status, { type: "info" });
-
-  reloadData(() => initAttendance());
-}
-
-// in-memory cache for UI interactions before persisting
-let attendanceCache = {};
+/* ================= CACHE INIT ================= */
 
 function initAttendanceCache(){
+
   attendanceCache = {};
+
   const list = APP_STORE.attendanceData || [];
-  const today = (document.getElementById("attendanceDate")||{}).value || getTodayLocal();
 
-  // populate from existing records for the selected date
-  list.filter(a=>a.date === today).forEach(a=>{
-    attendanceCache[a.staff] = {
-      checkIn: a.checkIn || "",
-      checkOut: a.checkOut || "",
-      status: a.status || "Present",
-      notes: a.notes || ""
+  const today =
+    document.getElementById("attendanceDate")?.value ||
+    getTodayLocal();
+
+  list
+  .filter(a=>a.date===today)
+  .forEach(a=>{
+
+    attendanceCache[a.staffCode] = {
+
+      checkIn:a.checkIn || "",
+      checkOut:a.checkOut || "",
+      status:a.status || "",
+      notes:a.notes || ""
+
     };
+
   });
 
-  // ensure every staff has an entry
   (APP_STORE.staffData||[]).forEach(s=>{
-    if (!attendanceCache[s]) attendanceCache[s] = { status: "", checkIn: "", checkOut: "", notes: "" };
+
+    if(!attendanceCache[s.code]){
+
+      attendanceCache[s.code] = {
+
+        status:"",
+        checkIn:"",
+        checkOut:"",
+        notes:""
+
+      };
+
+    }
+
   });
+
 }
 
+/* ================= STATS ================= */
+
 function renderAttendanceStats(){
+
   const staff = APP_STORE.staffData || [];
+
   const total = staff.length;
+
   let present = 0;
   let absent = 0;
 
-  Object.keys(attendanceCache || {}).forEach(k => {
-    const s = attendanceCache[k];
-    if (!s || !s.status) return;
-    if (s.status.toLowerCase() === 'present') present++;
-    else if (s.status.toLowerCase() === 'absent') absent++;
+  Object.values(attendanceCache).forEach(s=>{
+
+    if(!s.status) return;
+
+    if(s.status.toLowerCase()==="present") present++;
+    if(s.status.toLowerCase()==="absent") absent++;
+
   });
 
-  const elTotal = document.getElementById('statTotal'); if (elTotal) elTotal.innerText = total;
-  const elPresent = document.getElementById('statPresent'); if (elPresent) elPresent.innerText = present;
-  const elAbsent = document.getElementById('statAbsent'); if (elAbsent) elAbsent.innerText = absent;
+  document.getElementById("statTotal").innerText = total;
+  document.getElementById("statPresent").innerText = present;
+  document.getElementById("statAbsent").innerText = absent;
+
 }
 
+/* ================= STAFF LIST ================= */
+
 function renderStaffList(){
-  const listEl = document.getElementById('staffList');
-  if (!listEl) return;
-  listEl.innerHTML = '';
 
-  const staff = APP_STORE.staffData || [];
+  const listEl = document.getElementById("staffList");
+  if(!listEl) return;
 
-  staff.forEach(name => {
-    const entry = attendanceCache[name] || { status: '' };
+  listEl.innerHTML = "";
 
-    const li = document.createElement('li');
-    li.className = 'staff-item';
+  const selectedDate =
+    document.getElementById("attendanceDate")?.value ||
+    getTodayLocal();
 
-    const left = document.createElement('div');
-    left.className = 'staff-left';
+  let staff = APP_STORE.staffData || [];
 
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.innerText = name.split(' ').map(p=>p[0]||'').slice(0,2).join('').toUpperCase();
+  /* ===== SORT ACTIVE FIRST ===== */
 
-    const meta = document.createElement('div');
-    const n = document.createElement('div'); n.className='staff-name'; n.innerText = name;
-    const r = document.createElement('div'); r.className='staff-role'; r.innerText = (APP_STORE.staffRoles||{})[name] || '';
-    meta.appendChild(n); meta.appendChild(r);
+  staff = [...staff].sort((a,b)=>{
 
-    left.appendChild(avatar); left.appendChild(meta);
+    const s1 = (a.status||"").toLowerCase();
+    const s2 = (b.status||"").toLowerCase();
 
-    const actions = document.createElement('div'); actions.className='staff-actions';
+    if(s1==="active" && s2!=="active") return -1;
+    if(s1!=="active" && s2==="active") return 1;
 
-    const presentBtn = document.createElement('button');
-    presentBtn.className = 'toggle-btn present' + (entry.status && entry.status.toLowerCase()==='present' ? ' active present' : '');
-    presentBtn.innerText = 'Present';
-    presentBtn.onclick = () => { toggleAttendanceLocal(name, 'Present'); };
+    return 0;
 
-    const absentBtn = document.createElement('button');
-    absentBtn.className = 'toggle-btn absent' + (entry.status && entry.status.toLowerCase()==='absent' ? ' active absent' : '');
-    absentBtn.innerText = 'Absent';
-    absentBtn.onclick = () => { toggleAttendanceLocal(name, 'Absent'); };
+  });
 
-    actions.appendChild(presentBtn);
-    actions.appendChild(absentBtn);
+  staff.forEach(s=>{
 
-    li.appendChild(left);
-    li.appendChild(actions);
+    const entry =
+      attendanceCache[s.code] || {status:""};
+
+    /* ===== DATE RANGE CHECK ===== */
+
+    let disabled = false;
+
+    if(s.joinDate && selectedDate < s.joinDate)
+      disabled = true;
+
+    if(s.leaveDate && selectedDate > s.leaveDate)
+      disabled = true;
+
+    if((s.status||"").toLowerCase()==="inactive")
+      disabled = true;
+
+    const avatar =
+      s.name.split(" ")
+      .map(p=>p[0])
+      .slice(0,2)
+      .join("")
+      .toUpperCase();
+
+    const li = document.createElement("li");
+    li.className =
+      "staff-item"+(disabled?" staff-disabled":"");
+
+    li.innerHTML = `
+
+      <div class="staff-left">
+
+        <div class="avatar">${avatar}</div>
+
+        <div>
+
+          <div class="staff-name">${s.name}</div>
+
+          <div class="staff-role">${s.role || ""}</div>
+
+        </div>
+
+      </div>
+
+      <div class="staff-actions">
+
+        <button
+          class="toggle-btn present ${entry.status==='Present'?'active':''}"
+          onclick="toggleAttendanceLocal('${s.code}','Present')"
+          ${disabled?"disabled":""}
+        >
+          Present
+        </button>
+
+        <button
+          class="toggle-btn absent ${entry.status==='Absent'?'active':''}"
+          onclick="toggleAttendanceLocal('${s.code}','Absent')"
+          ${disabled?"disabled":""}
+        >
+          Absent
+        </button>
+
+      </div>
+
+    `;
 
     listEl.appendChild(li);
+
   });
 
   renderAttendanceStats();
+
+}
+
+function filterStaffList(){
+
+  const q =
+    document.getElementById("staffSearch")
+    ?.value.toLowerCase() || "";
+
+  const items =
+    document.querySelectorAll("#staffList .staff-item");
+
+  items.forEach(li => {
+
+    const name =
+      li.querySelector(".staff-name")
+      ?.innerText.toLowerCase() || "";
+
+    li.style.display =
+      name.includes(q) ? "flex" : "none";
+
+  });
+
 }

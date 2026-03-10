@@ -29,7 +29,11 @@
         <div class="card">
           <div class="top-controls">
             <input type="date" id="orderDate">
-            <select id="tableNo" multiple size="3"></select>
+            <div class="pos-tables">
+              <div id="tableGrid" class="table-grid"></div>
+              <!-- keep dropdown for fallback -->
+              <select id="tableNo" style="display:none"></select>
+            </div>
             <input type="text" id="customerName" placeholder="Customer name">
             <select id="orderSource"></select>
           </div>
@@ -78,7 +82,8 @@
 
             <input type="number" id="totalMembers" placeholder="Total members">
             <select id="eventType"></select>
-            <select id="deliveredBy"></select>
+            <select id="deliveredBy" style="display:none"></select>
+            <div id="staffSelector" class="staff-selector"></div>
             <input type="number" id="review" min="1" max="5" placeholder="Review (1–5)">
           </div>
 
@@ -94,15 +99,15 @@
     <label>Received by:</label>
     <div class="receiver-options">
       <label>
-        <input type="radio" name="receivedBy" value="Varun Garg" checked>
+        <input type="radio" name="receivedBy" value="MS001" checked>
         Varun Garg
       </label>
       <label>
-        <input type="radio" name="receivedBy" value="Amit Nagpal">
+        <input type="radio" name="receivedBy" value="MS002">
         Amit Nagpal
       </label>
       <label>
-        <input type="radio" name="receivedBy" value="Cash Counter">
+        <input type="radio" name="receivedBy" value="CASH">
         Cash Counter
       </label>
     </div>

@@ -29,52 +29,58 @@
     </div>
 
     <nav class="sidebar-nav">
-      <button id="nav-pos" onclick="navigateTo('pos')">
-        <span class="material-symbols-outlined icon">point_of_sale</span>
-        <span class="label">POS</span>
-      </button>
 
-      <button id="nav-bookings" onclick="navigateTo('bookings')">
-        <span class="material-symbols-outlined icon">event</span>
-        <span class="label">Bookings</span>
-      </button>
+  <button id="nav-pos" onclick="navigateTo('pos')">
+    <span class="material-icons icon">point_of_sale</span>
+    <span class="label">POS</span>
+  </button>
 
-      <button id="nav-orders" onclick="navigateTo('orders')">
-        <span class="material-symbols-outlined icon">receipt_long</span>
-        <span class="label">Orders</span>
-      </button>
+  <button id="nav-bookings" onclick="navigateTo('bookings')">
+    <span class="material-icons icon">event</span>
+    <span class="label">Bookings</span>
+  </button>
 
-      <button id="nav-expenses" onclick="navigateTo('expenses')">
-        <span class="material-symbols-outlined icon">payments</span>
-        <span class="label">Expenses</span>
-      </button>
+  <button id="nav-orders" onclick="navigateTo('orders')">
+    <span class="material-icons icon">receipt_long</span>
+    <span class="label">Orders</span>
+  </button>
 
-      <button id="nav-inventory" onclick="navigateTo('inventory')">
-        <span class="material-symbols-outlined icon">
-          inventory_2
-        </span>
-        <span class="label">Inventory</span>
-      </button>
+  <button id="nav-expenses" onclick="navigateTo('expenses')">
+    <span class="material-icons icon">payments</span>
+    <span class="label">Expenses</span>
+  </button>
 
-      <button onclick="navigateTo('items')" id="nav-items">
-        📊 Items Stats
-      </button>
+  <button id="nav-inventory" onclick="navigateTo('inventory')">
+    <span class="material-icons icon">inventory_2</span>
+    <span class="label">Inventory</span>
+  </button>
 
-      <button id="nav-attendance" onclick="navigateTo('attendance')">
-        <span class="material-symbols-outlined icon">
-          badge
-        </span>
-        <span class="label">Attendance</span>
-      </button>
+  <button id="nav-items" onclick="navigateTo('items')">
+    <span class="material-icons icon">bar_chart</span>
+    <span class="label">Item Stats</span>
+  </button>
 
-      <button id="nav-settings" onclick="navigateTo('settings')">
-        <span class="material-symbols-outlined icon">
-          settings
-        </span>
-        <span class="label">Settings</span>
-      </button>
-    </nav>
-    <button onclick="logout()">Logout</button>
+  <button id="nav-attendance" onclick="navigateTo('attendance')">
+    <span class="material-icons icon">badge</span>
+    <span class="label">Attendance</span>
+  </button>
+
+  <button id="nav-finance" onclick="navigateTo('finance')">
+    <span class="material-icons icon">account_balance_wallet</span>
+    <span class="label">Finance</span>
+  </button>
+
+  <button id="nav-settings" onclick="navigateTo('settings')">
+    <span class="material-icons icon">settings</span>
+    <span class="label">Settings</span>
+  </button>
+
+</nav>
+
+<button class="logout-btn" onclick="logout()">
+  <span class="material-icons">logout</span>
+  Logout
+</button>
 
     <div id="appVersion" class="app-version"></div>
   </div>
@@ -184,7 +190,8 @@
   <input type="hidden" name="account" id="f_e_account">
   <input type="hidden" name="type" id="f_e_type">
   <input type="hidden" name="paidBy" id="f_e_paidBy">
-  <input type="hidden" name="staffName" id="f_e_staff">
+  <input type="hidden" name="staffCode" id="f_e_staffCode">
+  <input type="hidden" name="staffName" id="f_e_staffName">
   <input type="hidden" name="expenseMode" id="f_e_mode">
   <input type="hidden" name="vendor" id="f_e_vendor">
   <input type="hidden" name="comment" id="f_e_comment">

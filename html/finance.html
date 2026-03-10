@@ -1,0 +1,305 @@
+<div id="financeScreen" class="screen">
+
+  <div class="page-header finance-header">
+    <h2>Finance</h2>
+  </div>
+
+
+  <!-- FINANCE TABS -->
+
+  <div class="finance-tabs">
+
+    <button class="finance-tab active" onclick="openFinanceTab(event,'staffLedger')">
+      Staff Ledger
+    </button>
+
+    <button class="finance-tab" onclick="openFinanceTab(event,'attendance')">
+      Attendance
+    </button>
+
+    <button class="finance-tab" onclick="openFinanceTab(event,'advances')">
+      Advances
+    </button>
+
+    <button class="finance-tab" onclick="openFinanceTab(event,'payroll')">
+      Payroll
+    </button>
+
+    <button class="finance-tab" onclick="openFinanceTab(event,'salaryPayments')">
+      Salary Payments
+    </button>
+
+  </div>
+
+
+  <!-- CONTENT -->
+
+  <div class="finance-content">
+
+
+    <!-- STAFF LEDGER -->
+
+    <div id="staffLedgerTab" class="finance-tab-screen active">
+
+      <div class="page-header finance-header">
+
+        <h3>Staff Ledger</h3>
+
+        <div class="finance-actions">
+
+          <button class="secondary-btn" onclick="toggleSalaryView()">
+            👁 Toggle Salaries
+          </button>
+
+          <button class="primary-btn" onclick="openStaffDrawer()">
+            + Add Staff
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- SALARY LEDGER -->
+
+      <div class="card">
+
+        <h4 style="margin-bottom:10px">Salary Overview</h4>
+
+        <div class="table-wrapper">
+
+          <table class="data-table finance-table">
+
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Staff</th>
+                <th>Salary</th>
+                <th>Advances</th>
+                <th>Present Days</th>
+                <th>Payable</th>
+              </tr>
+            </thead>
+
+            <tbody id="staffLedgerBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+      <!-- STAFF MASTER -->
+
+      <div class="card" style="margin-top:20px">
+
+        <h4 style="margin-bottom:10px">Staff Management</h4>
+
+        <div class="table-wrapper">
+
+          <table class="data-table finance-table">
+
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Join Date</th>
+                <th>Salary</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="staffTableBody"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ATTENDANCE -->
+
+    <div id="attendanceTab" class="finance-tab-screen">
+
+      <div class="card">
+        <h3>Attendance Ledger</h3>
+        <p>Attendance records will appear here.</p>
+      </div>
+
+    </div>
+
+
+    <!-- ADVANCES -->
+
+    <div id="advancesTab" class="finance-tab-screen">
+
+  <div class="card">
+
+    <div class="page-header">
+
+      <h3>Staff Advances</h3>
+
+      <select id="advanceStaffFilter" onchange="renderStaffAdvances()">
+        <option value="">All Staff</option>
+      </select>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="data-table finance-table">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Staff</th>
+            <th>Amount</th>
+            <th>Mode</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+
+        <tbody id="staffAdvancesTable"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+    <!-- PAYROLL -->
+
+    <div id="payrollTab" class="finance-tab-screen">
+
+  <div class="card">
+
+    <div class="page-header">
+
+      <h3>Payroll Generator</h3>
+
+      <div class="finance-actions">
+
+        <input type="month" id="payrollMonth">
+
+        <button class="primary-btn" onclick="generatePayrollUI()">
+          Generate Payroll
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="data-table finance-table">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Staff</th>
+            <th>Present Days</th>
+            <th>Salary</th>
+            <th>Payable</th>
+          </tr>
+        </thead>
+
+        <tbody id="payrollTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+    <!-- SALARY PAYMENTS -->
+
+    <div id="salaryPaymentsTab" class="finance-tab-screen">
+
+      <div class="card">
+        <h3>Salary Payments</h3>
+        <p>Salary payment records.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- STAFF DRAWER -->
+
+<div id="staffDrawer" class="drawer">
+
+  <div class="drawer-header">
+
+    <h3 id="staffDrawerTitle">Add Staff</h3>
+
+    <button class="drawer-close" onclick="closeStaffDrawer()">✕</button>
+
+  </div>
+
+  <div class="drawer-body">
+
+    <div class="form-grid staff-form">
+
+      <input id="staffCode" placeholder="Auto Generated" disabled>
+      <input id="staffName" placeholder="Staff Name">
+      <input id="staffRole" placeholder="Role">
+
+      <select id="staffGender">
+        <option value="">Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+
+      <input type="date" id="staffDOB">
+
+      <select id="staffMarital">
+        <option value="">Marital Status</option>
+        <option>Single</option>
+        <option>Married</option>
+      </select>
+
+      <input type="date" id="staffJoinDate">
+      <input type="date" id="staffLeaveDate">
+
+      <input id="staffSalary" placeholder="Salary">
+
+      <select id="staffStatus">
+        <option>Active</option>
+        <option>Inactive</option>
+      </select>
+
+      <input id="staffPhone" placeholder="Phone">
+      <input id="staffPermissions" placeholder="Permissions">
+
+    </div>
+
+  </div>
+
+  <div class="drawer-footer">
+
+    <button class="primary-btn" onclick="saveStaff()">
+      Save Staff
+    </button>
+
+  </div>
+
+</div>
+</div>
+
+
+

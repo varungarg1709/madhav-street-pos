@@ -12,7 +12,7 @@ function initExpenses() {
   expensesState = {
   from: params.expenses_from || today,
   to: params.expenses_to || today,
-  partner: params.expenses_partner || "",
+  partner: decodeURIComponent(params.expenses_partner || ""),
   pending: params.expenses_pending || "",
   sort: params.expenses_sort || "date_desc",
   category: params.expenses_category || "",
@@ -80,14 +80,33 @@ function populateExpenseDropdowns() {
   fillSelect("e_account", APP_STORE.payingAccounts, "Paying Account");
   fillSelect("e_type", APP_STORE.expenseTypes, "Expense Type");
   fillSelect("e_paidBy", APP_STORE.paidByList, "Paid by");
-  fillSelect("e_staff", APP_STORE.staffData, "Staff name");
   fillSelect("e_mode", APP_STORE.expenseModes, "Expense Mode");
   fillSelect("e_vendor", APP_STORE.vendors, "Purchased from");
 
   // populate filter selects as well
   fillSelect("expensesCategoryFilter", APP_STORE.expenseCategories, "All");
   fillSelect("expensesTypeFilter", APP_STORE.expenseTypes, "All");
-  fillSelect("expensesStaffFilter", APP_STORE.staffData, "All");
+
+  function fillStaffSelect(id, list, placeholder) {
+
+  const select = document.getElementById(id);
+  if (!select) return;
+
+  select.innerHTML = `<option value="">${placeholder}</option>`;
+
+  (list || []).forEach(s => {
+
+    const opt = document.createElement("option");
+
+    opt.value = s.code;      // store code
+    opt.textContent = s.name; // show name
+
+    select.appendChild(opt);
+  });
+}
+
+fillStaffSelect("e_staff", APP_STORE.staffData, "Staff name");
+fillStaffSelect("expensesStaffFilter", APP_STORE.staffData, "All staff");
 }
 
 function getSelectedExpenseTypes() {
@@ -125,8 +144,13 @@ function saveExpense() {
   document.getElementById("f_e_paidBy").value =
     document.getElementById("e_paidBy").value;
 
-  document.getElementById("f_e_staff").value =
-    document.getElementById("e_staff").value;
+  const staffSelect = document.getElementById("e_staff");
+
+document.getElementById("f_e_staffCode").value =
+  staffSelect.value || "";
+
+document.getElementById("f_e_staffName").value =
+  staffSelect.options[staffSelect.selectedIndex]?.text || "";
 
   document.getElementById("f_e_mode").value =
     document.getElementById("e_mode").value;
@@ -193,9 +217,13 @@ function applyExpenseFilters() {
     );
   }
 
-  // Partner filter
+  // Paid By filter
   if (partner) {
-    filtered = filtered.filter(e => e.partner === partner);
+    filtered = filtered.filter(e => {
+      const p1 = (e.paidBy || "").toLowerCase().trim();
+      const p2 = (partner || "").toLowerCase().trim();
+      return p1 === p2;
+    });
   }
 
   // Category filter
@@ -228,11 +256,11 @@ function applyExpenseFilters() {
 
   // Sorting
   if (sort === "date_desc") {
-    filtered.sort((a, b) => b.date.localeCompare(a.date));
+    filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
   }
 
   if (sort === "date_asc") {
-    filtered.sort((a, b) => a.date.localeCompare(b.date));
+    filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
   }
 
   if (sort === "amount_desc") {
@@ -278,20 +306,24 @@ function renderExpensesTable(list) {
   list.forEach((e, index) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-    <td>${index + 1}</td>
-      <td>${e.date}</td>
-      <td>${e.category || "-"}</td>
+      <td>${index + 1}</td>
+      <td>${formatDateUI(e.date)}</td>
+      <td>
+        <span class="expense-cat ${ (e.category||'').toLowerCase() }">
+          ${e.category || "-"}
+        </span>
+      </td>
       <td>${e.type || "-"}</td>
       <td>${e.vendor || "-"}</td>
       <td>${e.mode || "-"}</td>
-      <td>${e.partner || "-"}</td>
-      <td>₹${e.amount}</td>
+      <td>${e.staffName || "-"}</td>
+      <td>${e.paidBy || "-"}</td>
+      <td class="amount-col">₹${e.amount}</td>
       <td>${e.comment || "-"}</td>
     `;
     tbody.appendChild(tr);
   });
 }
-
 
 function renderExpenseSummary(list) {
   const container = document.getElementById("expenseSummary");
@@ -312,8 +344,8 @@ function renderExpenseSummary(list) {
     if (e.mode === "Cash") cash += amt;
     else if (e.mode === "UPI") upi += amt;
 
-    if (e.partner === "Varun Garg") varun += amt;
-    else if (e.partner === "Amit Nagpal") amit += amt;
+    if (e.paidBy === "Varun Garg") varun += amt;
+    else if (e.paidBy === "Amit Nagpal") amit += amt;
     else counter += amt;
   });
 

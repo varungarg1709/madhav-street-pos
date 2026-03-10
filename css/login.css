@@ -1,4 +1,6 @@
-.login-wrapper {
+/* ================= LOGIN LAYOUT ================= */
+
+.login-wrapper{
   height:100vh;
   display:flex;
   align-items:center;
@@ -6,136 +8,171 @@
   background:#f4f6f8;
 }
 
-.login-card {
-  width:320px;
+.login-card{
+  width:340px;
   background:#fff;
-  padding:28px;
-  border-radius:12px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.1);
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 10px 35px rgba(0,0,0,0.08);
+}
+
+/* ================= LOGO ================= */
+
+.login-logo{
+  width:90px;
+  display:block;
+  margin:0 auto 10px;
+}
+
+/* ================= TITLES ================= */
+
+.login-title{
+  text-align:center;
+  margin:0;
+  font-size:24px;
+  font-weight:700;
+}
+
+.login-sub{
+  text-align:center;
+  color:#666;
+  font-size:14px;
+  margin-bottom:22px;
+}
+
+/* ================= FORM FIELDS ================= */
+
+.login-field{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:16px;
+}
+
+.login-field label{
+  font-size:13px;
+  margin-bottom:5px;
+  color:#555;
+}
+
+.login-field input{
+  width:100%;
+  padding:11px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  font-size:14px;
+}
+
+.login-field input:focus{
+  outline:none;
+  border-color:#ff6a00;
+  box-shadow:0 0 0 3px rgba(255,106,0,0.12);
+}
+
+/* ================= PASSWORD FIELD ================= */
+
+.password-field{
+  position:relative;
+}
+
+.password-field input{
+  padding-right:44px;
+}
+
+/* Eye button */
+
+.toggle-password{
+  position:absolute;
+  right:8px;
+  top:calc(100%/2 + 9px);
+  transform:translateY(-50%);
+  border:none;
+  background:none;
+  cursor:pointer;
+
+  width:34px;
+  height:34px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:0;
+}
+
+/* disable global hover animation */
+
+.toggle-password:hover{
+  transform:translateY(-50%);
+  background:#f5f5f5;
+  border-radius:6px;
+}
+
+.toggle-password img{
+  pointer-events:none;
+}
+
+/* icon switching */
+
+.toggle-password .icon-eye-off{
+  display:none;
+}
+
+.password-field.showing .icon-eye{
+  display:none;
+}
+
+.password-field.showing .icon-eye-off{
+  display:block;
+}
+
+/* ================= REMEMBER ================= */
+
+.remember-row{
+  margin-top:4px;
+}
+
+.remember{
+  font-size:13px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* ================= BUTTON ================= */
+
+#loginBtn{
+  width:100%;
+  padding:12px;
+  margin-top:18px;
+  border:none;
+  border-radius:8px;
+  background:#ff6a00;
+  color:#fff;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+}
+
+#loginBtn:hover{
+  background:#e85f00;
+}
+
+/* ================= ERROR ================= */
+
+.login-error{
+  color:#d30000;
+  font-size:13px;
+  margin-top:10px;
   text-align:center;
 }
 
-.login-card input {
-  width:100%;
-  padding:12px;
-  margin-top:15px;
-  border:1px solid #ddd;
-  border-radius:8px;
-}
+/* ================= MOBILE ================= */
 
-.login-card button {
-  margin-top:15px;
-  width:100%;
-  padding:12px;
-  background:#ff6a00;
-  color:white;
-  border:none;
-  border-radius:8px;
-  font-weight:600;
-}
+@media (max-width:480px){
 
-.login-error {
-  color:red;
-  font-size:13px;
-}
-
-/* Password field with toggle */
-.password-field {
-  position: relative;
-}
-
-.password-field .toggle-password {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  padding: 4px;
-}
-
-/* Responsive tweaks */
-@media (max-width: 480px) {
-  .login-card {
-    width: 92%;
-    padding: 18px;
-  }
-  .login-card h2 {
-    font-size: 20px;
-  }
-}
-
-/* Toggle icon layering + animation */
-.toggle-password { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; }
-.toggle-password .icon { position: relative; display: inline-block; transition: opacity 180ms ease, transform 180ms ease; }
-.toggle-password .icon-eye { opacity: 1; transform: scale(1); }
-.toggle-password .icon-eye-off { opacity: 0; transform: scale(0.9); }
-.password-field.showing .toggle-password .icon-eye { opacity: 0; transform: scale(0.9); }
-.password-field.showing .toggle-password .icon-eye-off { opacity: 1; transform: scale(1); }
-
-.remember-row { text-align: left; margin-top: 8px; }
-.remember input { margin-right: 8px; }
-
-/* ===== PASSWORD FIELD ===== */
-
-.password-field input {
-  margin-top: 12px;
-  padding-right: 40px;
-}
-
-.toggle-password {
-  top: 58%;
-}
-
-/* ===== REMEMBER ME FIX ===== */
-
-.remember-row {
-  display: flex;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.remember {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.remember input {
-  margin: 0 !important;
-  width: auto !important;
-}
-
-/* ===== LOGIN BUTTON ONLY ===== */
-
-.login-card button[type="submit"] {
-  margin-top: 16px;
-}
-
-/* ===== REMOVE GLOBAL BUTTON STYLE ISSUE ===== */
-
-.login-card button {
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-
-  .login-card {
-    width: 92%;
-    margin: 20px auto;
-    padding: 20px;
-  }
-
-  .login-card h2 {
-    font-size: 20px;
-  }
-
-  .login-card button {
-    width: 100%;
+  .login-card{
+    width:92%;
+    padding:22px;
   }
 
 }
