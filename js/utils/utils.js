@@ -80,3 +80,11 @@ function hideAllToasts(){
 
 window.showToast = showToast;
 window.hideAllToasts = hideAllToasts;
+
+function getToken(){
+  return (
+    sessionStorage.getItem("ms_token") ||
+    localStorage.getItem("ms_token") ||
+    ""
+  );
+}

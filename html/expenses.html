@@ -106,6 +106,7 @@
   <th>Paid By</th>
   <th class="amount-col">Amount</th>
   <th class="comment-col">Comment</th>
+  <th id="expenseActionHeader">Action</th>
 </tr>
 </thead>
           <tbody id="expensesTableBody"></tbody>
@@ -158,8 +159,9 @@
       Close
     </button>
 
-    <button class="primary-btn"
-            onclick="saveExpense()">
+    <button id="saveExpenseBtn"
+        class="primary-btn"
+        onclick="saveExpense()">
       Save Expense
     </button>
   </div>

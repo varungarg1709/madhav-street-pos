@@ -1,0 +1,116 @@
+<div id="customersScreen" class="screen">
+
+  <div class="page-header">
+    <h2>Customers</h2>
+  </div>
+
+  <div class="customers-stats">
+    <div class="customer-stat">
+        <span id="topCustomerName">-</span>
+        <label>Top Customer</label>
+    </div>
+
+    <div class="customer-stat">
+        <span id="totalCustomers">0</span>
+        <label>Total Customers</label>
+    </div>
+
+    <div class="customer-stat">
+        <span id="avgSpend">₹0</span>
+        <label>Average Spend</label>
+    </div>
+
+    <div class="customer-stat">
+  <span id="newCustomers">0</span>
+  <label>New Today</label>
+</div>
+
+<div class="customer-stat">
+  <span id="returnCustomers">0</span>
+  <label>Returning</label>
+</div>
+
+<div class="customer-stat">
+  <span id="vipCustomers">0</span>
+  <label>VIP Customers</label>
+</div>
+<div class="customer-stat">
+  <span id="inactiveCustomers">0</span>
+  <label>Inactive 30 Days</label>
+</div>
+</div>
+
+<div class="customer-marketing">
+
+  <textarea
+    id="marketingMessage"
+    placeholder="Enter promotion message..."
+  ></textarea>
+
+  <button onclick="sendMarketingWhatsApp()">
+    Send to Customers
+  </button>
+
+</div>
+
+  <div class="card">
+
+    <!-- <div class="customers-filters">
+
+      <input
+        type="text"
+        id="customerSearch"
+        placeholder="Search name or phone"
+        oninput="renderCustomers()"
+      >
+
+    </div> -->
+
+    <div class="table-wrapper">
+
+      <div class="table-wrapper">
+  <div id="customersTable"></div>
+</div>
+
+    </div>
+
+  </div>
+
+<div id="customerDrawer" class="drawer">
+
+  <div class="drawer-header">
+    <h3 id="customerNameTitle"></h3>
+    <button onclick="closeCustomerDrawer()">✕</button>
+  </div>
+
+  <div class="drawer-body">
+
+  <div class="customer-summary-card">
+    <div id="customerSummary"></div>
+
+<div id="customerBadges" class="customer-badges"></div>
+
+<div id="customerFavorites"></div>
+  </div>
+
+  <h4 class="drawer-section-title">Order History</h4>
+
+  <div class="drawer-table-wrapper">
+    <table class="drawer-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Items</th>
+        </tr>
+      </thead>
+      <tbody id="customerOrders"></tbody>
+    </table>
+  </div>
+
+</div>
+
+</div>
+
+</div>

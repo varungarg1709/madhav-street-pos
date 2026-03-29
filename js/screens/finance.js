@@ -304,10 +304,12 @@ function renderStaffAdvances(){
 
   })
 
+  let totalAdvance = 0
   let html = ""
 
   expenses.forEach((e,i)=>{
 
+    totalAdvance += Number(e.amount) || 0
     html += `
       <tr>
 
@@ -339,6 +341,17 @@ function renderStaffAdvances(){
   }
 
   tbody.innerHTML = html
+
+  const summary = document.getElementById("advanceSummary")
+
+if(summary){
+
+  summary.innerHTML = `
+    Total Advances
+    <span>₹${totalAdvance.toLocaleString("en-IN")}</span>
+  `
+
+}
 
 }
 

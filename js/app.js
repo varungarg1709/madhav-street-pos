@@ -13,6 +13,7 @@ const screenLifecycle = {
   attendance:false,
   inventory:false,
   finance: false,
+  customers: false,
 };
 
 const loadedAssets = {
@@ -79,6 +80,12 @@ const screenAssets = {
     init:"initFinance"
   },
 
+  customers:{
+    css:["css/customers.css"],
+    js:["js/screens/customers.js"],
+    init:"initCustomers"
+  },
+
   settings:{
     css:["css/settings.css"],
     js:["js/screens/settings.js"],
@@ -89,7 +96,7 @@ const screenAssets = {
     css:["css/attendance.css"],
     js:["js/screens/attendance.js"],
     init:"initAttendance"
-  }  
+  },
 };
 
 /* ================= LOADERS ================= */
@@ -343,6 +350,10 @@ async function showScreen(screen){
 
     if(screen==="finance" && window.initFinance)
       initFinance();  // refresh finance data
+
+    if(screen==="customers" && window.initCustomers){
+      initCustomers()
+    }
   }
 }
 

@@ -50,32 +50,29 @@ function initOrders() {
     if (from) from.value = normalizeDate(ordersState.from);
     if (to) to.value = normalizeDate(ordersState.to);
 
-    document.getElementById("filterCustomer").value =
-      ordersState.customer;
+    document.getElementById("filterCustomer").value = ordersState.customer;
 
-    document.getElementById("filterPhone").value =
-      ordersState.phone;
+    document.getElementById("filterPhone").value = ordersState.phone;
 
-    document.getElementById("filterStatus").value =
-      ordersState.status;
+    document.getElementById("filterStatus").value = ordersState.status;
 
-    document.getElementById("pendingOnly").checked =
-      ordersState.pending;
+    document.getElementById("pendingOnly").checked = ordersState.pending;
 
     initVirtualScroll();
-    buildOrdersCache();
 
-    ordersInitializing = false;
+    loadOrdersFromAPI(() => {
+      buildOrdersCache();
+      ordersInitializing = false;
+      applyOrderFilters();
 
-    applyOrderFilters();
+      if (!params.orders_from && !params.orders_to) {
+        setDashboardPeriod("today");
+      } else {
+        dashboardPeriod = "custom";
+      }
 
-    if (!params.orders_from && !params.orders_to) {
-      setDashboardPeriod("today");
-    } else {
-      dashboardPeriod = "custom";
-    }
-
-    hideOrdersSkeleton();
+      hideOrdersSkeleton();
+    });
   });
 }
 
@@ -347,12 +344,14 @@ function buildOrderStats(list) {
       cash += pay.cash;
       upi  += pay.upi;
 
-      const partner = o.receivedBy || "Cash Counter";
+      let partnerName = getStaffName(o.receivedBy);
 
-      if (!partnerTotals[partner])
-        partnerTotals[partner] = 0;
+      if(!partnerName) partnerName = "Cash Counter";
 
-      partnerTotals[partner] += amt;
+      if (!partnerTotals[partnerName])
+        partnerTotals[partnerName] = 0;
+
+      partnerTotals[partnerName] += amt;
     }
 
     // pending
@@ -581,7 +580,12 @@ function setDashboardPeriod(period) {
     .getElementById("periodMonth")
     ?.classList.toggle("active", period === "month");
 
-  applyOrderFilters();
+  loadOrdersFromAPI(() => {
+
+    buildOrdersCache();
+    applyOrderFilters();
+
+  });
 }
 
 function onDateChange() {
@@ -598,7 +602,12 @@ function onDateChange() {
     .getElementById("periodMonth")
     ?.classList.remove("active");
 
-  applyOrderFilters();
+  loadOrdersFromAPI(() => {
+
+    buildOrdersCache();
+    applyOrderFilters();
+
+  });
 }
 
 function buildOrdersCache() {
@@ -670,5 +679,67 @@ function getStaffName(code){
   const found = staff.find(s => s.code === code);
 
   return found ? found.name : code;
+
+}
+
+function loadOrdersFromAPI(callback){
+
+  const from =
+    document.getElementById("ordersFromDate")?.value ||
+    ordersState.from;
+
+  const to =
+    document.getElementById("ordersToDate")?.value ||
+    ordersState.to;
+
+  const token = getToken();
+
+  const url =
+    CONFIG.scriptURL +
+    "?mode=orders" +
+    "&token=" + encodeURIComponent(token) +
+    "&from=" + encodeURIComponent(from) +
+    "&to=" + encodeURIComponent(to);
+
+  fetch(url)
+    .then(async r => {
+
+      const text = await r.text();
+
+      if(text === "Unauthorized"){
+        console.warn("Session expired");
+
+        showToast("Session expired. Please login again.", {type:"error"});
+
+        navigateTo("login");
+        throw new Error("Unauthorized");
+      }
+
+      try{
+        return JSON.parse(text);
+      }catch(err){
+        console.error("Invalid JSON:", text);
+        throw err;
+      }
+
+    })
+    .then(data => {
+
+      APP_STORE.orderData = data.orders || [];
+      APP_STORE.tableStatus = data.tableStatus || {};
+      APP_STORE.summary = data.summary || {};
+
+      if(callback) callback();
+
+    })
+    .catch(err => {
+
+      console.error("Orders API failed", err);
+
+      APP_STORE.orderData = [];
+
+      if(callback) callback();
+
+    });
 
 }
