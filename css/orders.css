@@ -45,31 +45,38 @@
 }
 
 .sales-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 12px 14px;
-  box-shadow: var(--shadow);
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
-  min-height: 72px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .sales-card span {
-  display: block;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  margin-top: 4px;
-  color: #111;
+}
+
+.sales-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.sales-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
 /* Color Accents */
 
-.card-total   { border-left: 5px solid #3b82f6; background:#f8fbff; }
-.card-cash    { border-left: 5px solid #22c55e; background:#f7fff9; }
-.card-upi     { border-left: 5px solid #8b5cf6; background:#fbf8ff; }
-.card-avg     { border-left: 5px solid #f59e0b; background:#fffaf3; }
-.card-pending { border-left: 5px solid #ef4444; background:#fff6f6; }
+.card-total span { color:#3b82f6 }
+.card-cash span { color:#16a34a }
+.card-upi span { color:#9333ea }
+.card-avg span { color:#f59e0b }
+.card-pending span { color:#ef4444 }
 
 .card-varun   { border-left: 5px solid #06b6d4; }
 .card-amit    { border-left: 5px solid #a855f7; }
@@ -291,4 +298,17 @@
 .order-locked {
   font-size: 16px;
   color: #999;
+}
+
+.pending-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.pending-filter input {
+  width: 16px;
+  height: 16px;
 }

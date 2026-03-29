@@ -142,13 +142,19 @@
 
   <div class="card">
 
-    <div class="page-header">
+    <div class="page-header advances-header">
 
       <h3>Staff Advances</h3>
 
-      <select id="advanceStaffFilter" onchange="renderStaffAdvances()">
-        <option value="">All Staff</option>
-      </select>
+      <div class="advances-controls">
+
+        <select id="advanceStaffFilter" onchange="renderStaffAdvances()">
+          <option value="">All Staff</option>
+        </select>
+
+        <div id="advanceSummary" class="advance-summary"></div>
+
+      </div>
 
     </div>
 

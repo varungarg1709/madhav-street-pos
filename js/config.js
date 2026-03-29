@@ -1,7 +1,7 @@
 // config.js (PRIVATE - DO NOT UPLOAD)
 
 const CONFIG = {
-  scriptURL: "https://script.google.com/macros/s/AKfycby02sF7AV4eihYYZI5QDdMiTblYwx0K4M7Wjh1Xikhm1exUs-VmmRK9YPu8atzoxeUL/exec",
+  scriptURL: "https://script.google.com/macros/s/AKfycbzrgasorr-x53tES2tlK3xz21SrIMR0HAJmxBRORsbQRfYDaXBFgjmh8laG-94vaEm_/exec",
 
   apiKey: "MadhavStreetSecret",
 
@@ -14,6 +14,7 @@ const CONFIG = {
     items: ['admin','manager','co_owner'],
     attendance: ['admin','manager','staff','co_owner'],
     finance: ['admin','manager','co_owner'],
+    customers:["admin","manager","co_owner"],
     settings: ['admin'] 
   },
 };

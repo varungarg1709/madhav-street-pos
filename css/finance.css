@@ -184,3 +184,56 @@
 .finance-tab-screen.active{
   display:block;
 }
+
+/* ADVANCE SUMMARY */
+
+.advance-summary{
+  background:#fff;
+  border-radius:10px;
+  padding:10px 14px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+  font-size:14px;
+  font-weight:600;
+}
+
+.advance-summary span{
+  font-size:18px;
+  font-weight:700;
+  color:#ff6a00;
+  margin-left:8px;
+}
+
+/* ADVANCES HEADER */
+
+.advances-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.advances-controls{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+/* TOTAL ADVANCE */
+
+.advance-summary{
+  font-size:14px;
+  font-weight:600;
+}
+
+.advance-summary span{
+  font-size:18px;
+  font-weight:700;
+  color:#ff6a00;
+  margin-left:6px;
+}
+
+.advance-summary{
+  background:#fff3ea;
+  padding:6px 12px;
+  border-radius:8px;
+}

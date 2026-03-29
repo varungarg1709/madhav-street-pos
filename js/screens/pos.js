@@ -6,26 +6,23 @@ let editingBillNo = null; // for future edit support
 let editOrderKey = null;
 
 function initPOS() {
-  if (!APP_STORE.loaded) {
-    console.warn("Store not loaded yet");
-    return;
-  }
-  setupPOS();
-  populateOrderDetails();
-  loadEditOrderIfAny();
-  buildStaffDropdown();
-  buildStaffSelector();
-  renderTableGrid();
+  loadPOSData(() => {
+    setupPOS();
+    populateOrderDetails();
+    loadEditOrderIfAny();
+    buildStaffDropdown();
+    buildStaffSelector();
+    renderTableGrid();
 
-  // Notify that POS screen finished initial rendering and is ready
-  try {
-    window.dispatchEvent(new CustomEvent('screen-ready', { detail: { screen: 'pos' } }));
-  } catch (e) {}
+    try {
+      window.dispatchEvent(
+        new CustomEvent("screen-ready", { detail: { screen: "pos" } })
+      );
+    } catch (e) {}
+  });
 }
 
-
 function loadEditOrderIfAny(){
-
   const order = window.EDIT_ORDER;
   if(!order) return;
 
@@ -992,30 +989,36 @@ function printBill() {
   window.print();
 }
 
-function autoFillCustomerFromPhone() {
+function autoFillCustomerFromPhone(){
+
   const phoneInput = document.getElementById("phone");
   const nameInput = document.getElementById("customerName");
 
-  if (!phoneInput || !nameInput) return;
-  if (!APP_STORE.orderData || !APP_STORE.orderData.length) return;
+  if(!phoneInput || !nameInput) return;
 
-  let phone = phoneInput.value.replace(/\D/g, ""); // digits only
+  let phone = phoneInput.value.replace(/\D/g,"");
 
-  if (phone.length < 10) return;
+  if(phone.length < 10) return;
 
-  // search latest orders first
-  const match = APP_STORE.orderData
-    .slice()
-    .reverse()
-    .find(o => {
-      if (!o.phone) return false;
-      let p = o.phone.toString().replace(/\D/g, "");
-      return p.endsWith(phone);
+  const url =
+    CONFIG.scriptURL +
+    "?mode=customerLookup" +
+    "&token=" + encodeURIComponent(getToken()) +
+    "&phone=" + encodeURIComponent(phone);
+
+  fetch(url)
+    .then(r=>r.json())
+    .then(data=>{
+
+      if(data && data.name){
+        nameInput.value = data.name;
+      }
+
+    })
+    .catch(err=>{
+      console.warn("Customer lookup failed",err);
     });
 
-  if (match && match.name) {
-    nameInput.value = match.name;
-  }
 }
 
 // expose helper so other screens can request POS to load an edit order
@@ -1292,5 +1295,52 @@ function toggleTable(table){
     });
 
   }
+
+}
+
+function loadPOSData(callback){
+
+  const token = getToken();
+
+  const url =
+    CONFIG.scriptURL +
+    "?mode=pos" +
+    "&token=" + encodeURIComponent(token);
+
+  fetch(url)
+    .then(async r => {
+
+      const text = await r.text();
+
+      if(text === "Unauthorized"){
+        showToast("Session expired. Please login again.", {type:"error"});
+        navigateTo("login");
+        throw new Error("Unauthorized");
+      }
+
+      try{
+        return JSON.parse(text);
+      }catch(err){
+        console.error("Invalid JSON:", text);
+        throw err;
+      }
+
+    })
+    .then(data => {
+      APP_STORE.menuData = data.menu || [];
+      APP_STORE.tableData = data.tables || [];
+      APP_STORE.orderTypes = data.orderTypes || [];
+      APP_STORE.orderSources = data.orderSources || [];
+      APP_STORE.eventTypes = data.eventTypes || [];
+      APP_STORE.staffData = data.staff || [];
+      APP_STORE.tableStatus = data.tableStatus || {};
+      APP_STORE.summary = data.summary || {};
+      APP_STORE.orderData = data.orders || [];
+      if(callback) callback();
+    })
+    .catch(err => {
+      console.error("POS API failed", err);
+      if(callback) callback();
+    });
 
 }
