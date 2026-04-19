@@ -1,0 +1,80 @@
+.order-container{
+  padding:12px;
+  padding-bottom:80px;
+}
+
+.customer-box input{
+  width:100%;
+  margin-bottom:8px;
+}
+
+/* CATEGORY TABS */
+.category-tabs{
+  display:flex;
+  overflow-x:auto;
+  gap:8px;
+  margin:10px 0;
+}
+
+.category-tabs button{
+  padding:8px 12px;
+  border:none;
+  border-radius:20px;
+  background:#eee;
+  white-space:nowrap;
+}
+
+.category-tabs button.active{
+  background:#ff6a00;
+  color:#fff;
+}
+
+/* MENU */
+.menu-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border-bottom:1px solid #eee;
+}
+
+.qty-box{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.qty-box button{
+  width:28px;
+  height:28px;
+}
+
+/* CART BAR */
+.cart-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  background:#fff;
+  border-top:1px solid #ddd;
+}
+
+/* CART MODAL */
+.cart-modal{
+  display:none;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  max-height:60%;
+  overflow:auto;
+  border-radius:12px 12px 0 0;
+}
+
+.cart-modal.open{
+  display:block;
+}

@@ -52,3 +52,100 @@ justify-content:center;
 gap:12px;
 margin-top:10px;
 }
+
+.ms-table {
+  background:#fff;
+  border-radius:12px;
+  padding:12px;
+}
+
+.ms-table-toolbar {
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.ms-search {
+  flex:1;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+
+.ms-table-scroll {
+  overflow:auto;
+}
+
+.ms-table table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+.ms-table th, .ms-table td {
+  padding:10px;
+  font-size:13px;
+  border-bottom:1px solid #eee;
+}
+
+.ms-sort {
+  cursor:pointer;
+}
+
+.ms-table-toolbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.ms-export {
+  background:#f3f4f6;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.ms-export:hover {
+  background:#e5e7eb;
+}
+
+.ms-pagesize {
+  padding:6px;
+  border-radius:6px;
+}
+
+.ms-table th {
+  background:#f9fafb;
+  font-weight:600;
+}
+
+.ms-table tr:hover {
+  background:#fafafa;
+}
+
+.action-icons {
+  display:flex;
+  gap:8px;
+}
+
+.icon-btn {
+  cursor:pointer;
+  font-size:16px;
+  padding:4px;
+  border-radius:6px;
+  transition:0.2s;
+}
+
+.icon-btn:hover {
+  background:#f3f4f6;
+}
+
+.icon-btn.edit:hover {
+  color:#2563eb;
+}
+
+.icon-btn.delete:hover {
+  color:#dc2626;
+}

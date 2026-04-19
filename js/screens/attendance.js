@@ -412,3 +412,120 @@ function filterStaffList(){
   });
 
 }
+
+function openMonthlyAttendance(){
+
+  const modal = document.getElementById("attendanceModal");
+
+  if(!modal){
+    console.error("attendanceModal not found");
+    return;
+  }
+
+  modal.style.display = "flex";
+
+  renderMonthlyAttendance();
+}
+
+function closeAttendanceModal(){
+  const modal = document.getElementById("attendanceModal");
+  if(modal){
+    modal.style.display = "none";
+  }
+}
+
+function renderMonthlyAttendance(){
+
+  const container =
+    document.getElementById("monthlyAttendanceTable");
+
+  if(!container) return;
+
+  const staff = APP_STORE.staffData || [];
+  const attendance = APP_STORE.attendanceData || [];
+
+  const selectedDate =
+    document.getElementById("attendanceDate")?.value ||
+    getTodayLocal();
+
+  const dateObj = new Date(selectedDate);
+
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+
+  const daysInMonth =
+    new Date(year, month + 1, 0).getDate();
+
+  /* ===== BUILD LOOKUP ===== */
+
+  const map = {};
+
+  attendance.forEach(a => {
+    if(!a.date) return;
+
+    const d = new Date(a.date);
+
+    if(d.getMonth() !== month || d.getFullYear() !== year)
+      return;
+
+    const key = a.staffCode + "_" + a.date;
+
+    map[key] = a.status;
+  });
+
+  /* ===== TABLE ===== */
+
+  let html = `<div class="month-grid"><table>`;
+
+  /* HEADER */
+  html += "<tr><th>Staff</th>";
+
+  for(let d=1; d<=daysInMonth; d++){
+    html += `<th>${d}</th>`;
+  }
+
+  html += "</tr>";
+
+  /* ROWS */
+  staff.forEach(s => {
+
+    html += `<tr><td>${s.name}</td>`;
+
+    for(let d=1; d<=daysInMonth; d++){
+
+      const day =
+        String(d).padStart(2,"0");
+
+      const monthStr =
+        String(month+1).padStart(2,"0");
+
+      const dateStr =
+        `${year}-${monthStr}-${day}`;
+
+      const key = s.code + "_" + dateStr;
+
+      const status = map[key] || "";
+
+      let cls = "";
+      let val = "";
+
+      if(status === "Present"){
+        cls = "present-cell";
+        val = "P";
+      }
+      else if(status === "Absent"){
+        cls = "absent-cell";
+        val = "A";
+      }
+
+      html += `<td class="${cls}">${val}</td>`;
+    }
+
+    html += "</tr>";
+
+  });
+
+  html += "</table></div>";
+
+  container.innerHTML = html;
+}

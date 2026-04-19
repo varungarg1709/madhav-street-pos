@@ -58,6 +58,9 @@
   border-radius: 10px;
   text-align: center;
   cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .bill {
@@ -174,4 +177,18 @@
 
 .table-selected{
   outline:3px solid #3b82f6;
+}
+
+.spin-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 9999;
+}
+
+.spin-overlay.open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

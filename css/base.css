@@ -62,7 +62,7 @@ body{
 /* ================= SIDEBAR ================= */
 
 .sidebar{
-  visibility: hidden;
+  /* visibility: hidden; */
   width:220px;
   background:var(--sidebar);
   display:flex;
@@ -328,4 +328,68 @@ textarea:focus{
     width:100%;
     right:-100%;
   }
+}
+
+.mobile-header{
+  display:none;
+}
+
+@media (max-width:768px){
+
+  .mobile-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 12px;
+    background:#fff;
+    border-bottom:1px solid #eee;
+  }
+
+  .menu-btn{
+    font-size:20px;
+    background:none;
+    border:none;
+    cursor:pointer;
+  }
+
+  .mobile-title{
+    font-weight:600;
+  }
+
+}
+
+@media (max-width:768px){
+
+  .sidebar{
+    position:fixed;
+    left:-260px;
+    top:0;
+    height:100vh;
+    width:240px;
+    z-index:999;
+    transition:left .25s ease;
+    visibility: visible; /* 👈 IMPORTANT */
+  }
+
+}
+
+.order-container{
+  max-width:600px;
+  margin:auto;
+  padding:16px;
+}
+
+.menu-item{
+  display:flex;
+  justify-content:space-between;
+  padding:12px;
+  border-bottom:1px solid #eee;
+}
+
+.cart{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  padding:12px;
+  border-top:1px solid #eee;
 }

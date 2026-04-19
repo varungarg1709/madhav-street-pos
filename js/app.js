@@ -34,7 +34,7 @@ window.APP_STORE = {
 const screenAssets = {
   pos:{
     css:["css/pos.css"],
-    js:["js/screens/pos.js"],
+    js:["js/screens/pos.js", "js/contest/contest.js", "js/contest/spin.js"],
     init:"initPOS"
   },
 
@@ -254,6 +254,10 @@ startApp = async function(){
 function navigateTo(screen){
 
   const btn = document.getElementById("nav-"+screen)
+
+  if(window.innerWidth <= 768){
+    document.getElementById("sidebar")?.classList.remove("mobile-open");
+  }
 
   if(btn && btn.style.display === "none"){
     console.warn("Access denied:",screen)
