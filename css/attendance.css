@@ -84,3 +84,61 @@
 .staff-disabled button{
   pointer-events:none;
 }
+
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000;
+}
+
+.modal-content{
+  background:#fff;
+  border-radius:12px;
+  width:90%;
+  max-height:90vh;
+  overflow:auto;
+}
+
+.modal-content.large{
+  width:95%;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid #eee;
+}
+
+.modal-body{
+  padding:16px;
+}
+
+/* Monthly grid */
+.month-grid table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+
+.month-grid th,
+.month-grid td{
+  padding:6px;
+  text-align:center;
+  border:1px solid #eee;
+}
+
+.present-cell{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.absent-cell{
+  background:#fee2e2;
+  color:#991b1b;
+}

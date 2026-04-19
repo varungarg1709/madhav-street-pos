@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order - Madhav Street</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/qrOrder.css">
+</head>
+
+<body>
+
+<div class="order-container">
+
+  <h2>🍽 Madhav Street</h2>
+  <div id="tableLabel"></div>
+
+  <div class="customer-box">
+    <input type="text" id="customerName" placeholder="Your Name">
+    <input type="tel" id="customerPhone" placeholder="Mobile Number">
+  </div>
+
+  <!-- CATEGORY TABS -->
+  <div id="categoryTabs" class="category-tabs"></div>
+
+  <!-- MENU -->
+  <div id="menuList" class="menu-list"></div>
+
+</div>
+
+<!-- STICKY CART -->
+<div class="cart-bar">
+  <div id="cartSummary">Cart: ₹0</div>
+  <button onclick="placeOrder()">Place Order</button>
+</div>
+
+<!-- CART MODAL -->
+<div id="cartModal" class="cart-modal">
+  <div class="cart-content">
+    <h3>Your Cart</h3>
+    <div id="cartItems"></div>
+    <button onclick="closeCart()">Close</button>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/order.js"></script>
+
+</body>
+</html>

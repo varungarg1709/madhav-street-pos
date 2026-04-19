@@ -1,3 +1,28 @@
+if (window.__POS_LOADED__) {
+  console.warn("pos.js already loaded");
+  throw new Error("Duplicate load blocked");
+}
+window.__POS_LOADED__ = true;
+
+let CURRENT_POS_REQUEST = null;
+
+const SUPABASE_URL = CONFIG.supabaseUrl;
+const SUPABASE_ANON_KEY = CONFIG.supabaseAnonKey;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error("❌ Supabase config missing");
+}
+
+// cache to avoid multiple calls
+let SUPABASE_MENU_CACHE = null;
+let SUPABASE_MENU_TS = 0;
+const MENU_CACHE_TTL = 5 * 60 * 1000; // 5 mins
+
+let MASTER_CACHE = null;
+let MASTER_TS = 0;
+const MASTER_TTL = 5 * 60 * 1000;
+
+let isMenuLoading = false;
 let selectedTables = [];
 let categories = [];
 let tableOrders = {};
@@ -5,9 +30,31 @@ let currentTable = "GENERAL";
 let editingBillNo = null; // for future edit support
 let editOrderKey = null;
 
+function getSupabaseClient() {
+  console.log("Supabase init check:", !!window.supabase);
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  if (!window.supabase) {
+    if (!window.__SUPABASE_WARNED__) {
+      console.warn("Supabase library not loaded");
+      window.__SUPABASE_WARNED__ = true;
+    }
+    return null;
+  }
+
+  if (!window._supabaseClient) {
+    window._supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+  }
+
+  return window._supabaseClient;
+}
+
 function initPOS() {
   loadPOSData(() => {
     setupPOS();
+    console.log("🚀 setupPOS triggered");
     populateOrderDetails();
     loadEditOrderIfAny();
     buildStaffDropdown();
@@ -35,6 +82,10 @@ function loadEditOrderIfAny(){
   document.getElementById("customerName").value = order.name || "";
   document.getElementById("phone").value = order.phone || "";
   document.getElementById("orderDate").value = order.date || getTodayLocal();
+  const dateInput = document.getElementById("orderDate");
+  if(dateInput){
+    dateInput.disabled = true;
+  }
 
   /* TABLE RESTORE */
 
@@ -231,18 +282,78 @@ function loadEditOrderIfAny(){
 }
 
 function setupPOS() {
-  let today = getTodayLocal();
-  document.getElementById("orderDate").value = today;
+  APP_STORE.tableData = APP_STORE.tableData || [];
+  APP_STORE.menuData = APP_STORE.menuData || [];
 
-  document.getElementById("orderDate")
-  .addEventListener("change", () => {
+  const grid = document.getElementById("menuGrid");
+  if (grid) {
+    grid.innerHTML = "<div class='empty-text'>Loading menu...</div>";
+  }
+  const dateInput = document.getElementById("orderDate");
 
-    renderTableGrid();
+  if(dateInput && !dateInput.value){
+    dateInput.value = getTodayLocal(); // ✅ set once only
+  }
 
-  });
+  if(dateInput && !dateInput.dataset.lastValue){
+    dateInput.dataset.lastValue = dateInput.value;
+  }
 
-  document.getElementById("discount")
-  .addEventListener("input", renderBill);
+  if(dateInput && !dateInput.dataset.bound){
+
+    dateInput.dataset.bound = "true";
+
+    dateInput.addEventListener("change", () => {
+      // 🚫 prevent change if items already added
+      const currentTableKey = getSelectedTable();
+      const hasItems = Object.values(tableOrders).some(order => Object.keys(order).length > 0);
+
+      if(hasItems){
+        alert("Cannot change date after adding items");
+        dateInput.value = dateInput.dataset.lastValue || getTodayLocal();
+        return;
+      }
+
+      
+      loadPOSData(() => {
+        const categoryMap = {};
+
+        (APP_STORE.menuData || []).forEach(i => {
+          // if (!(i.category in categoryMap)) {
+            categoryMap[i.category] = Math.min(
+              categoryMap[i.category] ?? 999,
+              i.sort_order ?? 999
+            );
+          // }
+        });
+
+        categories = Object.keys(categoryMap).sort(
+          (a, b) => categoryMap[a] - categoryMap[b]
+        );
+
+        if(!categories.length){
+          document.getElementById("menuGrid").innerHTML =
+            "<div class='empty-text'>⚠️ Menu not available</div>";
+          // return;
+        }
+        
+        renderCategories();
+        renderTableGrid();
+        renderBill();
+        
+        dateInput.dataset.lastValue = dateInput.value;
+
+        updateMenuLabel(); // 👈 NEW
+      });
+    });
+  }
+
+  const discountEl = document.getElementById("discount");
+
+  if(discountEl && !discountEl.dataset.bound){
+    discountEl.dataset.bound = "true";
+    discountEl.addEventListener("input", renderBill);
+  }
 
   // Tables
   const tableSelect = document.getElementById("tableNo");
@@ -278,23 +389,28 @@ function setupPOS() {
   });
 
   // Re-render bill when table changes
-  tableSelect.addEventListener("change", () => {
-    const table = tableSelect.value;
-    const runningOrder = findRunningOrderForTable(table);
+  if(tableSelect && !tableSelect.dataset.bound){
+    tableSelect.dataset.bound = "true";
 
-    if(runningOrder){
-      const confirmEdit = confirm(
-        `Table ${table} already has a running order.\nOpen existing bill?`
-      );
+    tableSelect.addEventListener("change", () => {
+      const table = tableSelect.value;
+      const runningOrder = findRunningOrderForTable(table);
 
-      if(confirmEdit){
-        window.EDIT_ORDER = runningOrder;
-        loadEditOrderIfAny();
-        return;
+      if(runningOrder){
+        const confirmEdit = confirm(
+          `Table ${table} already has a running order.\nOpen existing bill?`
+        );
+
+        if(confirmEdit){
+          window.EDIT_ORDER = runningOrder;
+          loadEditOrderIfAny();
+          return;
+        }
       }
-    }
-    renderBill();
-  });
+      currentTable = table;   // ✅ ADD THIS LINE
+      renderBill();
+    });
+  }
 
   // Order sources
   const sourceSelect = document.getElementById("orderSource");
@@ -322,10 +438,11 @@ function setupPOS() {
   .querySelectorAll('input[name="orderType"]')
   .forEach(radio => {
 
+    if(radio.dataset.bound) return;
+    radio.dataset.bound = "true";
+
     radio.addEventListener("change", () => {
-
       const type = radio.value;
-
       const tableEl = document.getElementById("tableNo");
 
       if(type === "Dine-in"){
@@ -334,27 +451,47 @@ function setupPOS() {
         tableEl.disabled = true;
         tableEl.selectedIndex = -1;
       }
-
     });
 
   });
 
   // Categories
-  categories = [...new Set((APP_STORE.menuData || []).map(i => i.category))].sort();
+  const categoryMap = {};
+
+  (APP_STORE.menuData || []).forEach(i => {
+    // if (!(i.category in categoryMap)) {
+        categoryMap[i.category] = Math.min(
+          categoryMap[i.category] ?? 999,
+          i.sort_order ?? 999
+        );
+    // }
+  });
+
+  categories = Object.keys(categoryMap).sort(
+    (a, b) => categoryMap[a] - categoryMap[b]
+  );
+
+  if(!categories.length){
+    document.getElementById("menuGrid").innerHTML =
+      "<div class='empty-text'>⚠️ Menu not available</div>";
+    // return;
+  }
   
   renderCategories();
 
-// Mobile: show full menu
-if (window.innerWidth <= 768) {
-  showAllItems();
-} else {
-  showCategory(categories[0]);
-}
+  // Mobile: show full menu
+  if (window.innerWidth <= 768) {
+    showAllItems();
+  } else if(categories.length){
+    showCategory(categories[0]);
+  }
 
   renderBill();
 }
 
 function renderCategories() {
+  if (!categories || !categories.length) return;
+
   const bar = document.getElementById("categoryBar");
   bar.innerHTML = "";
 
@@ -640,6 +777,11 @@ function clearBill() {
     tableSelect.selectedIndex = -1;
   }
 
+  const dateInput = document.getElementById("orderDate");
+  if(dateInput){
+    dateInput.disabled = false;
+  }
+
   document.getElementById("billItems").innerHTML =
     '<div class="empty-text">Tap menu items to add</div>';
 
@@ -692,6 +834,11 @@ function sendBillToWhatsApp(phone, billText) {
   // Add country code if missing
   if (cleanPhone.length === 10) {
     cleanPhone = "91" + cleanPhone;
+  } else if (cleanPhone.startsWith("91") && cleanPhone.length === 12) {
+    // ok
+  } else {
+    alert("Invalid phone number");
+    return;
   }
 
   if (cleanPhone.length < 12) {
@@ -719,17 +866,19 @@ function generateTempBillNumber() {
 }
 
 
-function generateWhatsappBillText(order, total, subtotal, discount) {
+function generateWhatsappBillText(order, total, subtotal, discount, billDate) {
   let billNoEl = document.getElementById("billNumber");
-let billNo = billNoEl.innerText;
+  let billNo = billNoEl.innerText;
 
-if (!billNo || billNo.includes("--")) {
-  billNo = generateTempBillNumber();
-}
+  if (!billNo || billNo.includes("--")) {
+    billNo = generateTempBillNumber();
+  }
 
   let orderType = document.querySelector('input[name="orderType"]:checked').value;
   let customer = document.getElementById("customerName").value || "Guest";
-  let date = new Date().toLocaleString("en-IN");
+  let date = billDate
+    ? new Date(billDate + "T12:00:00").toLocaleString("en-IN")
+    : new Date().toLocaleString("en-IN");
 
   let text = "🍽 *MADHAV STREET*\n\n";
   text += `*Bill No:* ${billNo}\n`;
@@ -740,34 +889,46 @@ if (!billNo || billNo.includes("--")) {
   text += "*ITEMS*\n";
 
   for (let item in order) {
-  let qty = order[item].qty;
-  let price = order[item].price;
-  let lineTotal = qty * price;
-  text += `${item} ${price}×${qty} = ₹${lineTotal}\n`;
-}
+    if(
+      !order[item] ||
+      typeof order[item] !== "object" ||
+      order[item].qty == null ||
+      order[item].price == null
+    ){
+      continue;
+    }
+
+    let qty = order[item].qty;
+    let price = order[item].price;
+    let lineTotal = qty * price;
+
+    text += `${item} ${price}×${qty} = ₹${lineTotal}\n`;
+  }
 
 
   text += "\n-----------------------------\n";
-text += `*Subtotal:* ₹${subtotal}\n`;
+  text += `*Subtotal:* ₹${subtotal}\n`;
 
-if (discount > 0) {
-  text += `*Discount:* ₹${discount}\n`;
-}
+  if (discount > 0) {
+    text += `*Discount:* ₹${discount}\n`;
+  }
 
-text += `*Grand Total:* *₹${total}*\n\n`;
-
+  text += `*Grand Total:* *₹${total}*\n\n`;
   text += "🙏 Thank you for visiting\n*Madhav Street*";
-
   return text;
 }
 
 
-function saveBill() {
+async function saveBill() {
+  const saveBtn = document.getElementById("saveBillBtn");
+  if (saveBtn) saveBtn.disabled = true;
+
   currentTable = getSelectedTable();
   let order = tableOrders[currentTable] || {};
 
   if (Object.keys(order).length === 0) {
     alert("No items in this bill");
+    if (saveBtn) saveBtn.disabled = false; // ✅ ADD THIS
     return;
   }
 
@@ -778,11 +939,11 @@ function saveBill() {
   let upi = parseFloat(document.getElementById("upiAmount").value) || 0;
   let card = parseFloat(document.getElementById("cardAmount").value) || 0;
 
-  const paymentJSON = JSON.stringify({
+  const paymentJSON = {
     cash,
     upi,
     card
-  });
+  };
 
   // Helper to safely set hidden fields
   function setHidden(id, value) {
@@ -795,7 +956,8 @@ function saveBill() {
 
   setHidden("f_orderDate", document.getElementById("orderDate").value);
   setHidden("f_customerName", document.getElementById("customerName").value);
-  setHidden("f_phone", document.getElementById("phone").value);
+  const cleanPhone = document.getElementById("phone").value.replace(/\D/g, "");
+  setHidden("f_phone", cleanPhone);
   setHidden("f_tableNo", currentTable);
 
   const typeEl = document.querySelector('input[name="orderType"]:checked');
@@ -805,40 +967,75 @@ function saveBill() {
   setHidden("f_deliveredBy", document.getElementById("deliveredBy").value);
   setHidden("f_orderItems", items);
 
-  setHidden("f_amount", document.getElementById("total").innerText);
-  setHidden("f_discount", document.getElementById("discount").value);
+  const subtotal = document.getElementById("subtotal").innerText;
+  const total = document.getElementById("total").innerText;
+  const discount = document.getElementById("discount").value;
 
-  setHidden("f_paymentMode", paymentJSON);
+  setHidden("f_subtotal", subtotal);
+  setHidden("f_total", total);
+  setHidden("f_discount", discount);
+
+  setHidden("f_paymentMode", JSON.stringify(paymentJSON));
   setHidden(
     "f_paymentStatus",
     document.getElementById("paymentStatus").innerText
   );
 
   // Received by
-const receiverEl = document.querySelector(
-  'input[name="receivedBy"]:checked'
-);
-setHidden(
-  "f_receivedBy",
-  receiverEl ? receiverEl.value : "MS001"
-);
+  const receiverEl = document.querySelector(
+    'input[name="receivedBy"]:checked'
+  );
+  setHidden(
+    "f_receivedBy",
+    receiverEl ? receiverEl.value : "MS001"
+  );
 
 
   setHidden("f_eventType", document.getElementById("eventType").value);
   setHidden("f_totalMembers", document.getElementById("totalMembers").value);
   setHidden("f_feedback", document.getElementById("feedback").value);
 
-  // Submit form
+  // 🎡 CONTEST BEFORE SUBMIT
+  try {
+    const totalAmount = parseFloat(document.getElementById("total").innerText) || 0;
+
+    let bill_no = document.getElementById("billNumber").innerText;
+
+    if (!bill_no || bill_no.includes("--")) {
+      bill_no = generateTempBillNumber();
+
+      const billEl = document.getElementById("billNumber");
+      if (billEl) billEl.innerText = bill_no;
+    }
+
+    if (totalAmount >= 500) {
+      const customer_name = document.getElementById("customerName").value || "Guest";
+
+      createContestEntry({
+        bill_no,
+        customer_name,
+        total: totalAmount
+      }).then(() => {
+        setTimeout(() => openSpin(bill_no, customer_name), 300);
+      }).catch(e => {
+        console.warn("Contest failed", e);
+      });
+    }
+  } catch (e) {
+    console.warn("Contest integration failed", e);
+  }
+
+  // ✅ THEN SUBMIT
   document.getElementById("hiddenForm").submit();
 
   // reload after backend writes
-setTimeout(() => {
-  reloadData(() => {
-    setupPOS();      // rebuild tables
-    renderTableGrid();
-    clearBill();
-  });
-}, 800);
+  setTimeout(() => {
+    reloadData(() => {
+      setupPOS();      // rebuild tables
+      renderTableGrid();
+      clearBill();
+    });
+  }, 1200);
 
   // WhatsApp sending
   const sendWA = document.getElementById("sendWhatsapp");
@@ -854,6 +1051,15 @@ setTimeout(() => {
     if (cleanPhone.length >= 12) {
       let subtotal = 0;
       for (let item in order) {
+        if(
+          !order[item] ||
+          typeof order[item] !== "object" ||
+          order[item].qty == null ||
+          order[item].price == null
+        ){
+          continue;
+        }
+
         subtotal += order[item].qty * order[item].price;
       }
 
@@ -865,7 +1071,8 @@ setTimeout(() => {
         order,
         total,
         subtotal,
-        discount
+        discount,
+        document.getElementById("orderDate").value
       );
 
       let encodedText = encodeURIComponent(billText);
@@ -877,10 +1084,13 @@ setTimeout(() => {
   // Reset edit state
   editingBillNo = null;
 
-  delete tableOrders[currentTable];
-  clearBill();
+  const dateInput = document.getElementById("orderDate");
+  if(dateInput){
+    dateInput.disabled = false;
+  }
 
   alert("Bill saved successfully");
+  if (saveBtn) saveBtn.disabled = false;
 }
 
 
@@ -940,8 +1150,12 @@ function printBill() {
   }
 
   document.getElementById("p_billNo").innerText = billNo;
+  const billDate = document.getElementById("orderDate").value;
+
   document.getElementById("p_date").innerText =
-    new Date().toLocaleString("en-IN");
+    billDate
+      ? new Date(billDate + "T12:00:00").toLocaleString("en-IN")
+      : new Date().toLocaleString("en-IN");
 
   document.getElementById("p_customer").innerText =
     document.getElementById("customerName").value || "Guest";
@@ -1298,49 +1512,485 @@ function toggleTable(table){
 
 }
 
+async function fetchMenuFromSupabase() {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    console.warn("Supabase not initialized");
+    return null;
+  }
+
+  try {
+    if (
+      SUPABASE_MENU_CACHE &&
+      Date.now() - SUPABASE_MENU_TS < MENU_CACHE_TTL
+    ) {
+      return SUPABASE_MENU_CACHE;
+    }
+
+    // 1. Get active menu
+    const { data: activeMenu, error: menuError } = await supabase
+      .from("menus")
+      .select("id")
+      .eq("is_active", true)
+      .single();
+
+    if (menuError || !activeMenu) {
+      throw new Error("No active menu found");
+    }
+
+    // 2. Fetch menu items with category
+    const { data, error } = await supabase
+      .from("menu_items")
+      .select(`
+        item,
+        price,
+        menu_categories: category_id (
+          name,
+          sort_order
+        )
+      `)
+      .eq("menu_id", activeMenu.id);
+
+    if (error) throw error;
+
+    // 3. Map to POS format
+    const mapped = (data || []).map(item => ({
+      item: item.item,
+      price: Number(item.price) || 0,
+      category: item.menu_categories?.name || "Other",
+      sort_order: item.menu_categories?.sort_order || 999
+    }));
+
+    SUPABASE_MENU_CACHE = mapped;
+    SUPABASE_MENU_TS = Date.now();
+
+    return mapped;
+
+  } catch (err) {
+    console.warn("⚠️ Supabase menu fetch failed:", err.message);
+    return null; // fallback trigger
+  }
+}
+
 function loadPOSData(callback){
 
   const token = getToken();
+  const date = document.getElementById("orderDate")?.value || getTodayLocal();
+
+  const requestId = Date.now();
+  CURRENT_POS_REQUEST = requestId;
+
+  const cbName = "POS_CB_" + requestId;
 
   const url =
     CONFIG.scriptURL +
     "?mode=pos" +
-    "&token=" + encodeURIComponent(token);
+    "&token=" + encodeURIComponent(token) +
+    "&date=" + encodeURIComponent(date) +
+    "&callback=" + cbName;
 
-  fetch(url)
-    .then(async r => {
+    console.log("📅 POS DATE:", date);
 
-      const text = await r.text();
+  window[cbName] = function(data){
+    console.log("✅ POS CALLBACK RECEIVED:", data);
+    
+    // 🚫 Ignore stale response
+    if (CURRENT_POS_REQUEST !== requestId) {
+      console.warn("Stale POS response ignored");
+      return;
+    }
 
-      if(text === "Unauthorized"){
-        showToast("Session expired. Please login again.", {type:"error"});
-        navigateTo("login");
-        throw new Error("Unauthorized");
+    delete window[cbName];
+
+    if(!data){
+      console.error("No data received");
+      return;
+    }
+
+    // keep Apps Script menu as fallback
+    const fallbackMenu = data.menu || [];
+
+    // assign other data first
+    const fallbackMaster = {
+      tableData: data.tables || [],
+      orderTypes: data.orderTypes || [],
+      orderSources: data.orderSources || [],
+      eventTypes: data.eventTypes || [],
+      staffData: data.staff || []
+    };
+
+    if (isMenuLoading) {
+      console.warn("Menu already loading, skipping duplicate call");
+      // return;
+    }
+    isMenuLoading = true;
+
+    APP_STORE.tableStatus = data.tableStatus || {};
+    APP_STORE.summary = data.summary || {};
+    APP_STORE.orderData = data.orders || [];
+
+    console.log("📦 Orders loaded:", APP_STORE.orderData.length);
+
+    Promise.all([
+      fetchMenuFromSupabase(),
+      fetchMasterDataFromSupabase()
+    ]).then(([supabaseMenu, master]) => {
+
+      // ✅ MASTER DATA
+      if (master) {
+        APP_STORE.tableData = master.tableData;
+        APP_STORE.orderTypes = master.orderTypes;
+        APP_STORE.orderSources = master.orderSources;
+        APP_STORE.eventTypes = master.eventTypes;
+        APP_STORE.staffData = master.staffData;
+
+        console.log("✅ Supabase master data loaded");
+      } else {
+        APP_STORE.tableData = fallbackMaster.tableData;
+        APP_STORE.orderTypes = fallbackMaster.orderTypes;
+        APP_STORE.orderSources = fallbackMaster.orderSources;
+        APP_STORE.eventTypes = fallbackMaster.eventTypes;
+        APP_STORE.staffData = fallbackMaster.staffData;
+
+        console.log("⚠️ Using Apps Script master fallback");
       }
 
-      try{
-        return JSON.parse(text);
-      }catch(err){
-        console.error("Invalid JSON:", text);
-        throw err;
+      console.log("📦 Tables loaded:", APP_STORE.tableData?.length);
+      console.log("✅ FINAL DATA READY → calling setupPOS");
+
+      // ✅ MENU
+      if (supabaseMenu && supabaseMenu.length) {
+        APP_STORE.menuData = supabaseMenu;
+        console.log("✅ Supabase menu loaded:", supabaseMenu.length);
+        console.log("Menu source: Supabase");
+      } else {
+        APP_STORE.menuData = fallbackMenu;
+        console.log("⚠️ Using Apps Script menu fallback");
+        console.log("Menu source: Apps Script");
       }
 
-    })
-    .then(data => {
-      APP_STORE.menuData = data.menu || [];
-      APP_STORE.tableData = data.tables || [];
-      APP_STORE.orderTypes = data.orderTypes || [];
-      APP_STORE.orderSources = data.orderSources || [];
-      APP_STORE.eventTypes = data.eventTypes || [];
-      APP_STORE.staffData = data.staff || [];
-      APP_STORE.tableStatus = data.tableStatus || {};
-      APP_STORE.summary = data.summary || {};
-      APP_STORE.orderData = data.orders || [];
-      if(callback) callback();
+      if (callback) callback();
     })
     .catch(err => {
-      console.error("POS API failed", err);
-      if(callback) callback();
+      console.error("❌ Supabase load failed:", err);
+    })
+    .finally(() => {
+      isMenuLoading = false;
     });
 
+    setTimeout(() => {
+      if (isMenuLoading) {
+        console.warn("⚠️ Force reset loading flag");
+        isMenuLoading = false;
+      }
+    }, 5000);
+
+    APP_STORE.menuDataFallback = fallbackMenu;
+  };
+
+  const script = document.createElement("script");
+  script.src = url;
+
+  script.onload = () => {
+    script.remove(); // ✅ cleanup
+  };
+
+  script.onerror = () => {
+    script.remove();
+    console.error("❌ JSONP failed");
+
+    Promise.all([
+      fetchMenuFromSupabase(),
+      fetchMasterDataFromSupabase()
+    ]).then(([menu, master]) => {
+
+      APP_STORE.menuData = menu || [];
+
+      if (master) {
+        APP_STORE.tableData = master.tableData;
+        APP_STORE.orderTypes = master.orderTypes;
+        APP_STORE.orderSources = master.orderSources;
+        APP_STORE.eventTypes = master.eventTypes;
+        APP_STORE.staffData = master.staffData;
+      } else {
+        APP_STORE.tableData = [];
+        APP_STORE.orderTypes = [];
+        APP_STORE.orderSources = [];
+        APP_STORE.eventTypes = [];
+        APP_STORE.staffData = [];
+      }
+
+      APP_STORE.tableStatus = {};
+      APP_STORE.summary = {};
+      APP_STORE.orderData = [];
+
+      if (callback) callback();
+    });
+  };
+
+  document.body.appendChild(script);
+}
+
+function updateMenuLabel(){
+  const label = document.getElementById("menuLabel");
+  const dateInput = document.getElementById("orderDate");
+
+  if(!label || !dateInput) return; // ✅ safety
+
+  const date = new Date(dateInput.value);
+  const ym = date.toISOString().slice(0,7);
+
+  if(ym === "2026-01"){
+    label.innerText = "📜 January Menu";
+  } else {
+    label.innerText = "📜 Current Menu";
+  }
+}
+
+async function fetchMasterDataFromSupabase() {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+
+  try {
+    if (MASTER_CACHE && Date.now() - MASTER_TS < MASTER_TTL) {
+      console.log("⚡ Using cached master data");
+      return MASTER_CACHE;
+    }
+    const [
+      tablesRes,
+      typesRes,
+      sourcesRes,
+      eventsRes,
+      staffRes
+    ] = await Promise.all([
+      supabase.from("tables").select("name").order("sort_order"),
+      supabase.from("order_types").select("name"),
+      supabase.from("order_sources").select("name"),
+      supabase.from("event_types").select("name"),
+      supabase.from("staff").select("name, code, status")
+    ]);
+
+    if (tablesRes.error || typesRes.error || sourcesRes.error || eventsRes.error || staffRes.error) {
+      throw new Error("One or more master queries failed");
+    }
+
+    const result = {
+      tableData: (tablesRes.data || [])
+        .map(t => t.name)
+        .filter(Boolean),
+      orderTypes: typesRes.data?.map(t => t.name) || [],
+      orderSources: sourcesRes.data?.map(s => s.name) || [],
+      eventTypes: eventsRes.data?.map(e => e.name) || [],
+      staffData: (staffRes.data || []).filter(
+        s => (s.status || "").toLowerCase() === "active"
+      )
+    };
+
+    MASTER_CACHE = result;
+    MASTER_TS = Date.now();
+
+    return result;
+
+  } catch (err) {
+    console.warn("⚠️ Supabase master fetch failed:", err.message);
+    return null;
+  }
+}
+
+async function migrateOrdersFromSheet() {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    console.error("Supabase not initialized");
+    return;
+  }
+
+  const token = getAuthToken();
+  const url = `${CONFIG.scriptURL}?mode=orders&token=${token}`;
+
+  console.log("📦 Fetching orders from Apps Script...");
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  console.log("📦 Raw API response:", data);
+
+  const rows = data.orders || [];
+
+  console.log(`🚀 Migrating ${rows.length} orders...`);
+  console.log("🔍 Sample row:", rows[0]);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  const { data: allCustomers } = await supabase
+    .from("customers")
+    .select("id, phone");
+
+  const customerMap = {};
+  (allCustomers || []).forEach(c => {
+    customerMap[c.phone] = c.id;
+  });
+
+  for (const row of rows) {
+    try {
+      const billNo = row.billNo;   // ✅ FIXED
+      if (!billNo) continue;
+
+      // 🧠 Parse items
+      let items = {};
+
+      try {
+        items = JSON.parse(row.itemsJSON || "{}");
+
+        if (!items || typeof items !== "object" || Array.isArray(items)) {
+          console.warn("⚠️ Invalid items skipped:", billNo);
+          continue;
+        }
+
+      } catch (e) {
+        console.warn("⚠️ Invalid JSON for:", billNo);
+        continue; // ❗ IMPORTANT
+      }
+
+      console.log("🍽 Items parsed:", billNo, items);
+
+      // 🧠 CUSTOMER UPSERT
+      const phone = (row.phone || "")
+        .toString()
+        .trim()
+        .replace(/\D/g, "");
+
+      let customerId = null;
+
+      if (phone.length >= 10) {
+        customerId = customerMap[phone];
+
+        if (!customerId) {
+          const { data: newCustomer } = await supabase
+            .from("customers")
+            .insert({ name: row.name || "Guest", phone })
+            .select()
+            .single();
+
+          if (newCustomer) {
+            customerId = newCustomer.id;
+            customerMap[phone] = customerId;
+          }
+        }
+      } else {
+        console.warn("⚠️ Skipping invalid phone:", row.phone);
+      }
+
+      // 🧠 Calculations
+      const finalAmount = Number(row.amount) || 0;
+      if (finalAmount <= 0) {
+        console.warn("⚠️ Skipping zero amount order:", billNo);
+        continue;
+      }
+      const discount = Number(row.discount) || 0;
+      const subtotal = finalAmount + discount;
+
+      // 🧠 Payment JSON
+      const paymentMode = row.paymentMode || "";
+      const payment_json = {
+        method: paymentMode,
+        amount: finalAmount
+      };
+
+      // if (paymentMode.includes("Cash")) payment_json.cash = finalAmount;
+      // if (paymentMode.includes("UPI")) payment_json.upi = finalAmount;
+      // if (paymentMode.includes("Card")) payment_json.card = finalAmount;
+
+      // 🧠 Date parsing
+      const dateObj = row.date ? new Date(row.date) : new Date();
+
+      if (isNaN(dateObj)) {
+        console.warn("Invalid date for:", billNo);
+        continue;
+      }
+
+      const order_date = dateObj.toISOString().split("T")[0];
+      const order_time = dateObj.toTimeString().split(" ")[0];
+
+      console.log("🔁 Upserting bill:", billNo);
+      // ✅ UPSERT ORDER
+      const { data: order, error } = await supabase
+        .from("orders")
+        .upsert({
+          bill_no: billNo,
+          order_date,
+          order_time,
+          customer_id: customerId,
+          customer_name: row.name,
+          phone: phone,
+          table_no: row.table,
+          order_type: row.orderType,
+          order_source: row.orderSource,
+          delivered_by: row.deliveredBy,
+          subtotal,
+          discount,
+          total: finalAmount,
+          payment_mode: paymentMode,
+          payment_json,
+          payment_status: row.status,
+          received_by: row.receivedBy,
+          event_type: row.eventType,
+          total_members: Number(row.totalMembers) || 0,
+          feedback: row.feedback,
+          items_json: items
+        }, { onConflict: "bill_no" })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("❌ Order insert failed:", billNo, error);
+        failCount++;
+        continue;
+      }
+
+      if (!order) {
+        console.warn("⚠️ No order returned:", billNo);
+        failCount++;
+        continue;
+      }
+
+      console.log("🧾 Inserted order:", billNo, order.id);
+
+      // 🧾 Insert items
+      const itemsPayload = Object.entries(items).map(([name, val]) => ({
+        order_id: order.id,
+        item_name: name,
+        qty: Number(val.qty) || 0,
+        price: Number(val.price) || 0
+      }));
+
+      if (itemsPayload.length) {
+        await supabase.from("order_items").delete().eq("order_id", order.id);
+
+        const { error: itemsError } = await supabase
+          .from("order_items")
+          .insert(itemsPayload);
+
+        if (itemsError) {
+          console.error("❌ Items insert failed:", billNo, itemsError);
+        }
+      }
+
+      console.log(`✅ Migrated: ${billNo}`);
+      successCount++;
+      if (successCount % 25 === 0) {
+        console.log(`⏳ Progress: ${successCount}/${rows.length}`);
+      }
+
+    } catch (err) {
+      console.error("🔥 Error processing row:", err);
+      failCount++;
+    }
+  }
+
+  console.log(`🎉 Migration completed! ✅ ${successCount} success, ❌ ${failCount} failed`);
+}
+
+function openKitchen() {
+  window.open("kitchen.html", "_blank");
 }

@@ -44,7 +44,9 @@ function createTable(config){
 
       rows = rows.filter(r =>
         Object.values(r).some(v =>
-          String(v).toLowerCase().includes(s)
+          typeof v === "string" || typeof v === "number"
+            ? String(v).toLowerCase().includes(s)
+            : false
         )
       )
 
@@ -153,9 +155,11 @@ html += `
 <td>
 <input type="checkbox"
 class="ms-row-check"
-value="${row.phone || index}">
+value="${row.id || index}"
+>
 </td>
 `
+// value="${row.phone || index}"
 
 html += `<td>${index}</td>`
 

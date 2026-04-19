@@ -16,6 +16,10 @@
         Save Attendance
       </button>
 
+      <button class="ghost-btn" onclick="openMonthlyAttendance()">
+        View Month
+      </button>
+
     </div>
 
   </div>
@@ -97,6 +101,16 @@
 
     </table>
 
+  </div>
+
+  <div id="attendanceModal" class="modal">
+    <div class="modal-content large">
+      <div class="modal-header">
+        <h3>Monthly Attendance</h3>
+        <button onclick="closeAttendanceModal()">✕</button>
+      </div>
+      <div id="monthlyAttendanceTable" class="modal-body"></div>
+    </div>
   </div>
 
 </div>

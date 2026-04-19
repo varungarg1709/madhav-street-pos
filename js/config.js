@@ -1,7 +1,10 @@
 // config.js (PRIVATE - DO NOT UPLOAD)
 
 const CONFIG = {
-  scriptURL: "https://script.google.com/macros/s/AKfycbzrgasorr-x53tES2tlK3xz21SrIMR0HAJmxBRORsbQRfYDaXBFgjmh8laG-94vaEm_/exec",
+  scriptURL: "https://script.google.com/macros/s/AKfycbzS-61t-5XEi8M3lpnp2GkOtoHTbbkuzRZ-5MOW0jLlORpjpbVE4VlZwV8F7u4R0lhz/exec",
+
+  supabaseUrl: "https://nxxjqhaszlrtxcainlqo.supabase.co",
+  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54eGpxaGFzemxydHhjYWlubHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMDI2ODgsImV4cCI6MjA4OTY3ODY4OH0.7Ci8E6aJWcLxQP63Z_lCDNemsEGpVklQVGvJnroOjpw",
 
   apiKey: "MadhavStreetSecret",
 

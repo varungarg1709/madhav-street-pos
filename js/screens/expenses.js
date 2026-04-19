@@ -350,43 +350,50 @@ function applyExpenseFilters() {
 
 
 
-function renderExpensesTable(list) {
-  const tbody = document.getElementById("expensesTableBody");
-  if (!tbody) return;
+function renderExpensesTable(list){
 
-  tbody.innerHTML = "";
+  const isAdmin = getUserRole() === "admin";
 
-  if (!list.length) {
-    tbody.innerHTML =
-      `<tr><td colspan='${getUserRole() === "admin" ? 11 : 10}'>No expenses found</td></tr>`;
-    return;
+  const columns = [
+    { field: "date", label: "Date", format: v => formatDateUI(v) },
+    { field: "category", label: "Category" },
+    { field: "type", label: "Type" },
+    { field: "vendor", label: "Vendor" },
+    { field: "mode", label: "Mode" },
+    { field: "staffName", label: "Procured By" },
+    { field: "paidBy", label: "Paid By" },
+    { field: "amount", label: "Amount", format: v => `₹${v}` },
+    { field: "comment", label: "Comment" }
+  ];
+
+  // ✅ Add action column for admin
+  if(isAdmin){
+    columns.push({
+      field: "action",
+      label: "Action",
+      format: (v,row) => `
+        <div class="action-icons">
+          <span class="icon-btn edit"
+                title="Edit"
+                onclick="editExpenseById('${row.id}')">
+            ✏️
+          </span>
+
+          <span class="icon-btn delete"
+                title="Delete"
+                onclick="deleteExpense('${row.id}')">
+            🗑️
+          </span>
+        </div>
+      `
+    });
   }
 
-  list.forEach((e, index) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${formatDateUI(e.date)}</td>
-      <td>
-        <span class="expense-cat ${ (e.category||'').toLowerCase() }">
-          ${e.category || "-"}
-        </span>
-      </td>
-      <td>${e.type || "-"}</td>
-      <td>${e.vendor || "-"}</td>
-      <td>${e.mode || "-"}</td>
-      <td>${e.staffName || "-"}</td>
-      <td>${e.paidBy || "-"}</td>
-      <td class="amount-col">₹${e.amount}</td>
-      <td>${e.comment || "-"}</td>
-      ${ getUserRole() === "admin" ? `
-      <td>
-        <button onclick="editExpenseById('${e.id}')">Edit</button>
-        <button onclick="deleteExpense('${e.id}')">Delete</button>
-      </td>
-      ` : "" }
-    `;
-    tbody.appendChild(tr);
+  createTable({
+    container: "#expensesCustomTable",
+    data: list,
+    pageSize: 10,
+    columns
   });
 }
 
@@ -416,15 +423,15 @@ function renderExpenseSummary(list) {
 
   // Aggregations by category and staff
   const catTotals = {};
-  const staffTotals = {};
+  // const staffTotals = {};
 
   list.forEach(e => {
     const amt = Number(e.amount) || 0;
     const cat = e.category || 'Uncategorized';
-    const st = e.staff || 'Unknown';
+    // const st = e.staff || 'Unknown';
 
     catTotals[cat] = (catTotals[cat] || 0) + amt;
-    staffTotals[st] = (staffTotals[st] || 0) + amt;
+    // staffTotals[st] = (staffTotals[st] || 0) + amt;
   });
 
   function topList(map, n){
@@ -432,7 +439,7 @@ function renderExpenseSummary(list) {
   }
 
   const topCats = topList(catTotals,5);
-  const topStaff = topList(staffTotals,5);
+  // const topStaff = topList(staffTotals,5);
 
   let html = `
     <div class="summary-card">
@@ -455,9 +462,9 @@ function renderExpenseSummary(list) {
   html += `</div>`;
 
   // top staff
-  html += `<div class="summary-card"><div class="stat-title">Top Staff</div>`;
-  topStaff.forEach(it=>{ html += `<div style="margin-top:6px">${it.k} — ₹${it.v}</div>` });
-  html += `</div>`;
+  // html += `<div class="summary-card"><div class="stat-title">Top Staff</div>`;
+  // topStaff.forEach(it=>{ html += `<div style="margin-top:6px">${it.k} — ₹${it.v}</div>` });
+  // html += `</div>`;
 
   container.innerHTML = html;
 }

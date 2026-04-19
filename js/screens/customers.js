@@ -19,7 +19,27 @@ async function loadCustomers(){
 
   const res = await fetch(url);
 
-  const data = await res.json();
+  const text = await res.text();
+
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    console.error("Invalid JSON:", text);
+
+    if (text.includes("Unauthorized")) {
+      alert("Session expired. Please login again.");
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      location.reload();
+      return;
+    }
+
+    throw err;
+  }
 
   customersCache = data.customers || [];
 
@@ -226,28 +246,32 @@ function checkBirthdays(){
 
 }
 
-async function openCustomerProfile(phone){
+function openCustomerProfile(phone){
+
+  const callbackName = "cb_" + Date.now();
 
   const url =
     CONFIG.scriptURL +
     "?mode=customerOrders" +
     "&phone=" + encodeURIComponent(phone) +
-    "&token=" + encodeURIComponent(getToken())
+    "&token=" + encodeURIComponent(getToken()) +
+    "&callback=" + callbackName;
 
-  let data = {}
+  window[callbackName] = function(data){
 
-  try{
+    delete window[callbackName];
 
-    const res = await fetch(url)
+    renderCustomerOrdersUI(phone, data);
 
-    data = await res.json()
+  };
 
-  }catch(err){
+  const script = document.createElement("script");
+  script.src = url;
 
-    console.error("Customer orders fetch failed", err)
-    return
+  document.body.appendChild(script);
+}
 
-  }
+function renderCustomerOrdersUI(phone, data){
 
   const orders = data.orders || []
 
@@ -261,7 +285,7 @@ async function openCustomerProfile(phone){
   document.getElementById("customerNameTitle").innerText = name
 
   document.getElementById("customerBadges").innerHTML =
-  generateCustomerBadges(orders)
+    generateCustomerBadges(orders)
 
   let total = 0
 
@@ -277,24 +301,23 @@ async function openCustomerProfile(phone){
 
   const favItems = getFavoriteItems(orders)
 
-let favHTML = "<b>Favorite Items</b><br>"
+  let favHTML = "<b>Favorite Items</b><br>"
 
-if(!favItems.length){
-  favHTML += "No data"
-}else{
-  favItems.forEach(f=>{
-    favHTML += `${f[0]} × ${f[1]}<br>`
-  })
-}
+  if(!favItems.length){
+    favHTML += "No data"
+  }else{
+    favItems.forEach(f=>{
+      favHTML += `${f[0]} × ${f[1]}<br>`
+    })
+  }
 
-document.getElementById("customerFavorites").innerHTML = favHTML
+  document.getElementById("customerFavorites").innerHTML = favHTML
 
   const tbody = document.getElementById("customerOrders")
 
   let html = ""
 
   orders.forEach((o, i)=>{
-
     html += `
       <tr>
         <td>${i + 1}</td>
@@ -303,7 +326,6 @@ document.getElementById("customerFavorites").innerHTML = favHTML
         <td>${formatItems(o.itemsJSON)}</td>
       </tr>
     `
-
   })
 
   tbody.innerHTML = html
@@ -311,8 +333,9 @@ document.getElementById("customerFavorites").innerHTML = favHTML
   document
     .getElementById("customerDrawer")
     .classList.add("open")
-
 }
+
+
 
 function closeCustomerDrawer(){
   document

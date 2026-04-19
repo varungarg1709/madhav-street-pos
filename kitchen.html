@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Madhav Street Kitchen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/kitchen.css">
+</head>
+
+<body>
+
+<div class="header">
+  <h2>Madhav Street Kitchen</h2>
+  <input id="name" placeholder="Your name">
+  <input id="search" placeholder="Search items...">
+  <div id="tabs" class="tabs"></div>
+</div>
+
+<div id="items" class="grid"></div>
+
+<!-- Cart Bar -->
+
+<div id="cartBar" class="cart-bar hidden">
+  <span id="cartText"></span>
+  <button onclick="openCart()">Submit Order →</button>
+</div>
+
+<!-- Modal -->
+
+<div id="modal" class="modal hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/kitchen.js"></script>
+
+</body>
+</html>
